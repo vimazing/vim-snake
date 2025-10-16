@@ -1,0 +1,33 @@
+/* =========================================================
+   🔧 Controls (tweak these)
+   ========================================================= */
+:root {
+  --snake-cell-size: 16px;
+}
+
+/* =========================================================
+   Container & Board Base
+   ========================================================= */
+#snake-board {
+  position: relative;
+  background-color: var(--card, #1e2030);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(27, 29, 43, 0.6), inset 0 0 6px color-mix(in srgb, var(--primary, #82aaff) 5%, transparent);
+  padding: 4px;
+}
+
+/* =========================================================
+   Snake Board Layout
+   ========================================================= */
+.snake-row {
+  display: flex;
+}
+
+.snake-cell {
+  width: var(--snake-cell-size);
+  height: var(--snake-cell-size);
+  background-color: var(--muted, #2f334d);
+  border: 1px solid var(--border, #3b3f5c);
+  box-sizing: border-box;
+}
+

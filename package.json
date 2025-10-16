@@ -1,0 +1,62 @@
+{
+  "name": "@vimazing/vim-snake",
+  "version": "0.1.0",
+  "description": "Classic Snake reimagined with Vim controls — a lightweight, typed React hook library for building snake games with hjkl navigation.",
+  "author": "André Padez <andre.padez@gmail.com>",
+  "keywords": [
+    "snake",
+    "vim",
+    "react",
+    "hooks",
+    "game",
+    "modal-editing",
+    "typescript",
+    "vimazing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vimazing/vim-snake.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vimazing/vim-snake/issues"
+  },
+  "homepage": "https://github.com/vimazing/vim-snake#readme",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./useGame": {
+      "import": "./dist/useGame/index.js",
+      "types": "./dist/useGame/index.d.ts"
+    },
+    "./useScore": {
+      "import": "./dist/useScore/index.js",
+      "types": "./dist/useScore/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    },
+    "./*.css": "./dist/*.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --outDir dist --declaration --emitDeclarationOnly false && node -e \"const fs = require('node:fs'); fs.mkdirSync('dist', { recursive: true }); fs.copyFileSync('src/game.css', 'dist/game.css');\"",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "@types/react": "^19.2.2",
+    "typescript": "~5.9.3"
+  }
+}
