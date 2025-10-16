@@ -1,17 +1,39 @@
 import { useEffect } from "react";
 import { useRenderer } from "./useRenderer";
+import { useSnake } from "./useSnake";
+import { useGameStatus } from "./useGameStatus";
+import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
 
 export function useGame(cols: number, rows: number, platformHook?: unknown) {
   const rendererManager = useRenderer();
   const { containerRef, renderBoard } = rendererManager;
 
+  const snakeManager = useSnake(cols, rows, rendererManager);
+  const { changeDirection } = snakeManager;
+
+  const gameManager = useGameStatus(rendererManager, snakeManager);
+  const { gameStatus, startGame, stopGame } = gameManager;
+
   useEffect(() => {
     renderBoard(cols, rows);
   }, [cols, rows]);
 
+  const keyBindings: UseKeyBindingsType = useKeyBindings({
+    gameManager: {
+      gameStatus,
+      startGame,
+      stopGame,
+      changeDirection,
+    },
+  });
+
   const fullGameManager = {
     containerRef,
-    renderBoard,
+    gameStatus,
+    startGame,
+    stopGame,
+    ...snakeManager,
+    ...keyBindings,
   };
 
   if (typeof platformHook === "function") {

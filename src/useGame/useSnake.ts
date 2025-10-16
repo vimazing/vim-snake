@@ -1,3 +1,80 @@
-export function useSnake() {
-  return {};
+import { useRef, useState } from "react";
+import type { Direction, SnakeBody } from "../types";
+import type { UseRendererType } from "./useRenderer";
+
+export function useSnake(
+  cols: number,
+  rows: number,
+  rendererManager: UseRendererType
+) {
+  const { containerRef } = rendererManager;
+  const [snakeBody, setSnakeBody] = useState<SnakeBody>([]);
+  const [direction, setDirection] = useState<Direction>("up");
+  const directionRef = useRef<Direction>("up");
+
+  const initSnake = () => {
+    const centerR = Math.floor(rows / 2);
+    const centerC = Math.floor(cols / 2);
+    
+    const initialBody: SnakeBody = [
+      { r: centerR, c: centerC },
+      { r: centerR + 1, c: centerC },
+      { r: centerR + 2, c: centerC },
+    ];
+    
+    setSnakeBody(initialBody);
+    setDirection("up");
+    directionRef.current = "up";
+    renderSnake(initialBody);
+  };
+
+  const clearSnake = () => {
+    setSnakeBody([]);
+    setDirection("up");
+    directionRef.current = "up";
+  };
+
+  const renderSnake = (body: SnakeBody) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.querySelectorAll(".snake-head, .snake-body").forEach((el) => {
+      el.classList.remove("snake-head", "snake-body");
+    });
+
+    body.forEach((segment, idx) => {
+      const cell = container.querySelector(
+        `.snake-cell[data-r="${segment.r}"][data-c="${segment.c}"]`
+      );
+      if (cell) {
+        cell.classList.add(idx === 0 ? "snake-head" : "snake-body");
+      }
+    });
+  };
+
+  const changeDirection = (newDirection: Direction) => {
+    const opposites: Record<Direction, Direction> = {
+      up: "down",
+      down: "up",
+      left: "right",
+      right: "left",
+    };
+
+    if (opposites[directionRef.current] !== newDirection) {
+      setDirection(newDirection);
+      directionRef.current = newDirection;
+    }
+  };
+
+  return {
+    snakeBody,
+    direction,
+    directionRef,
+    initSnake,
+    clearSnake,
+    changeDirection,
+    renderSnake,
+  };
 }
+
+export type UseSnakeType = ReturnType<typeof useSnake>;
