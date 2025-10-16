@@ -4,7 +4,8 @@ import type { UseRendererType } from "./useRenderer";
 import type { UseSnakeType } from "./useSnake";
 import type { UseFoodType } from "./useFood";
 
-const FRAMES_PER_SECOND = 5;
+const INITIAL_FPS = 5;
+const FOODS_PER_LEVEL = 2;
 
 export function useGameStatus(
   rendererManager: UseRendererType,
@@ -16,10 +17,14 @@ export function useGameStatus(
   const { spawnFood, clearFood } = foodManager;
   const [gameStatus, setGameStatus] = useState<GameStatus>("waiting");
   const [score, setScore] = useState(0);
+  const [level, setLevel] = useState(1);
+  const foodsEatenRef = useRef(0);
   const gameLoopRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
   const snakeManagerRef = useRef(snakeManager);
   const foodManagerRef = useRef(foodManager);
+  const currentFpsRef = useRef(INITIAL_FPS);
+  const collisionGracePeriodRef = useRef(false);
 
   snakeManagerRef.current = snakeManager;
   foodManagerRef.current = foodManager;
@@ -28,6 +33,10 @@ export function useGameStatus(
     initSnake();
     spawnFood(snakeBodyRef.current, 3);
     setScore(0);
+    setLevel(1);
+    foodsEatenRef.current = 0;
+    currentFpsRef.current = INITIAL_FPS;
+    collisionGracePeriodRef.current = false;
     setGameStatus("started");
   };
 
@@ -40,8 +49,8 @@ export function useGameStatus(
     clearFood();
     setGameStatus("waiting");
     const container = containerRef.current;
-    container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el) => {
-      el.classList.remove("snake-head", "snake-body", "snake-tail");
+    container?.querySelectorAll(".snake-head, .snake-body, .snake-tail, .collision").forEach((el) => {
+      el.classList.remove("snake-head", "snake-body", "snake-tail", "collision");
     });
   };
 
@@ -51,10 +60,10 @@ export function useGameStatus(
       console.log("Starting game loop");
       
       let shouldGrow = false;
-      const msPerFrame = 1000 / FRAMES_PER_SECOND;
       lastUpdateRef.current = performance.now();
 
       const gameLoop = (timestamp: number) => {
+        const msPerFrame = 1000 / currentFpsRef.current;
         const elapsed = timestamp - lastUpdateRef.current;
 
         if (elapsed >= msPerFrame) {
@@ -64,17 +73,44 @@ export function useGameStatus(
           
           shouldGrow = false;
           
-          if (result === "wall-collision") {
-            setGameStatus("game-over");
-            return;
+          if (result === "wall-collision" || result === "self-collision") {
+            if (collisionGracePeriodRef.current) {
+              const container = containerRef.current;
+              container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el) => {
+                el.classList.add("collision");
+              });
+              setGameStatus("game-over");
+              return;
+            } else {
+              collisionGracePeriodRef.current = true;
+              lastUpdateRef.current = timestamp;
+              gameLoopRef.current = requestAnimationFrame(gameLoop);
+              return;
+            }
           }
+          
+          collisionGracePeriodRef.current = false;
 
           const head = snakeManagerRef.current.snakeBodyRef.current[0];
           if (head && foodManagerRef.current.checkFoodCollision(head)) {
             console.log("Food eaten!");
             foodManagerRef.current.removeFood(head);
             shouldGrow = true;
-            setScore((prev) => prev + 1);
+            
+            foodsEatenRef.current += 1;
+            
+            if (foodsEatenRef.current >= FOODS_PER_LEVEL) {
+              setLevel((lvl) => {
+                const newLevel = lvl + 1;
+                currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
+                console.log(`Level up! Level ${newLevel}, FPS: ${currentFpsRef.current}`);
+                return newLevel;
+              });
+              foodsEatenRef.current = 0;
+            }
+            
+            setScore((prev) => prev + level);
+            
             foodManagerRef.current.spawnFood(
               snakeManagerRef.current.snakeBodyRef.current,
               1
@@ -114,6 +150,7 @@ export function useGameStatus(
     startGame,
     stopGame,
     score,
+    level,
   };
 }
 

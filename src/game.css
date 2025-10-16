@@ -100,6 +100,33 @@
 }
 
 /* =========================================================
+   Collision Effect
+   ========================================================= */
+.snake-cell.collision {
+  background-color: var(--destructive, #c53b53) !important;
+  box-shadow: 
+    0 0 12px color-mix(in srgb, var(--destructive, #c53b53) 90%, transparent),
+    0 0 24px color-mix(in srgb, var(--destructive, #c53b53) 60%, transparent),
+    inset 0 0 8px color-mix(in srgb, var(--destructive, #c53b53) 70%, transparent) !important;
+  animation: collision-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes collision-pulse {
+  0% {
+    box-shadow: 
+      0 0 12px color-mix(in srgb, var(--destructive, #c53b53) 90%, transparent),
+      0 0 24px color-mix(in srgb, var(--destructive, #c53b53) 60%, transparent),
+      inset 0 0 8px color-mix(in srgb, var(--destructive, #c53b53) 70%, transparent);
+  }
+  100% {
+    box-shadow: 
+      0 0 20px color-mix(in srgb, var(--destructive, #c53b53) 100%, transparent),
+      0 0 40px color-mix(in srgb, var(--destructive, #c53b53) 80%, transparent),
+      inset 0 0 12px color-mix(in srgb, var(--destructive, #c53b53) 90%, transparent);
+  }
+}
+
+/* =========================================================
    Food Rendering
    ========================================================= */
 .snake-cell.food {

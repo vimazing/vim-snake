@@ -12,6 +12,7 @@ export function useSnake(
   const snakeBodyRef = useRef<SnakeBody>([]);
   const [direction, setDirection] = useState<Direction>("up");
   const directionRef = useRef<Direction>("up");
+  const lastMovedDirectionRef = useRef<Direction>("up");
 
   const initSnake = () => {
     const centerR = Math.floor(rows / 2);
@@ -27,6 +28,7 @@ export function useSnake(
     snakeBodyRef.current = initialBody;
     setDirection("up");
     directionRef.current = "up";
+    lastMovedDirectionRef.current = "up";
     renderSnake(initialBody);
   };
 
@@ -35,6 +37,7 @@ export function useSnake(
     snakeBodyRef.current = [];
     setDirection("up");
     directionRef.current = "up";
+    lastMovedDirectionRef.current = "up";
   };
 
   const renderSnake = (body: SnakeBody) => {
@@ -100,7 +103,7 @@ export function useSnake(
       right: "left",
     };
 
-    if (opposites[directionRef.current] !== newDirection) {
+    if (opposites[lastMovedDirectionRef.current] !== newDirection) {
       setDirection(newDirection);
       directionRef.current = newDirection;
     }
@@ -136,10 +139,23 @@ export function useSnake(
     }
 
     const newHead = { r: newR, c: newC };
+
+    // Check self-collision (excluding tail if not growing, as tail will move)
+    const bodyToCheck = grow ? body : body.slice(0, -1);
+    const collision = bodyToCheck.some(
+      (segment) => segment.r === newHead.r && segment.c === newHead.c
+    );
+
+    if (collision) {
+      return "self-collision";
+    }
+
     const newBody = grow 
       ? [newHead, ...body]
       : [newHead, ...body.slice(0, -1)];
 
+    lastMovedDirectionRef.current = dir;
+    
     setSnakeBody(newBody);
     snakeBodyRef.current = newBody;
     renderSnake(newBody);
