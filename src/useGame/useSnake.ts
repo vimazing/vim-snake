@@ -9,6 +9,7 @@ export function useSnake(
 ) {
   const { containerRef } = rendererManager;
   const [snakeBody, setSnakeBody] = useState<SnakeBody>([]);
+  const snakeBodyRef = useRef<SnakeBody>([]);
   const [direction, setDirection] = useState<Direction>("up");
   const directionRef = useRef<Direction>("up");
 
@@ -23,6 +24,7 @@ export function useSnake(
     ];
     
     setSnakeBody(initialBody);
+    snakeBodyRef.current = initialBody;
     setDirection("up");
     directionRef.current = "up";
     renderSnake(initialBody);
@@ -30,6 +32,7 @@ export function useSnake(
 
   const clearSnake = () => {
     setSnakeBody([]);
+    snakeBodyRef.current = [];
     setDirection("up");
     directionRef.current = "up";
   };
@@ -66,13 +69,54 @@ export function useSnake(
     }
   };
 
+  const moveSnake = (): "continue" | "wall-collision" | "self-collision" => {
+    const body = snakeBodyRef.current;
+    if (body.length === 0) return "continue";
+
+    const head = body[0];
+    const dir = directionRef.current;
+
+    let newR = head.r;
+    let newC = head.c;
+
+    switch (dir) {
+      case "up":
+        newR -= 1;
+        break;
+      case "down":
+        newR += 1;
+        break;
+      case "left":
+        newC -= 1;
+        break;
+      case "right":
+        newC += 1;
+        break;
+    }
+
+    if (newR < 0 || newR >= rows || newC < 0 || newC >= cols) {
+      return "wall-collision";
+    }
+
+    const newHead = { r: newR, c: newC };
+    const newBody = [newHead, ...body.slice(0, -1)];
+
+    setSnakeBody(newBody);
+    snakeBodyRef.current = newBody;
+    renderSnake(newBody);
+
+    return "continue";
+  };
+
   return {
     snakeBody,
+    snakeBodyRef,
     direction,
     directionRef,
     initSnake,
     clearSnake,
     changeDirection,
+    moveSnake,
     renderSnake,
   };
 }

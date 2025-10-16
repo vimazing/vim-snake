@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { GameStatus } from "../types";
 import type { UseRendererType } from "./useRenderer";
 import type { UseSnakeType } from "./useSnake";
+
+const INITIAL_SPEED = 200;
 
 export function useGameStatus(
   rendererManager: UseRendererType,
@@ -10,6 +12,10 @@ export function useGameStatus(
   const { containerRef } = rendererManager;
   const { initSnake, clearSnake } = snakeManager;
   const [gameStatus, setGameStatus] = useState<GameStatus>("waiting");
+  const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const snakeManagerRef = useRef(snakeManager);
+
+  snakeManagerRef.current = snakeManager;
 
   const startGame = () => {
     initSnake();
@@ -17,6 +23,10 @@ export function useGameStatus(
   };
 
   const stopGame = () => {
+    if (gameLoopRef.current) {
+      clearInterval(gameLoopRef.current);
+      gameLoopRef.current = null;
+    }
     clearSnake();
     setGameStatus("waiting");
     const container = containerRef.current;
@@ -24,6 +34,39 @@ export function useGameStatus(
       el.classList.remove("snake-head", "snake-body");
     });
   };
+
+  useEffect(() => {
+    console.log("useGameStatus effect - gameStatus:", gameStatus);
+    if (gameStatus === "started") {
+      console.log("Starting game loop");
+      gameLoopRef.current = setInterval(() => {
+        console.log("Game loop tick");
+        const result = snakeManagerRef.current.moveSnake();
+        console.log("Move result:", result);
+        
+        if (result === "wall-collision") {
+          setGameStatus("game-over");
+        }
+      }, INITIAL_SPEED);
+
+      return () => {
+        console.log("Cleaning up game loop");
+        if (gameLoopRef.current) {
+          clearInterval(gameLoopRef.current);
+          gameLoopRef.current = null;
+        }
+      };
+    }
+  }, [gameStatus]);
+
+  useEffect(() => {
+    if (gameStatus === "game-over") {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
+    }
+  }, [gameStatus]);
 
   return {
     gameStatus,
