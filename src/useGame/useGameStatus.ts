@@ -18,6 +18,7 @@ export function useGameStatus(
   const [gameStatus, setGameStatus] = useState<GameStatus>("waiting");
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
+  const levelRef = useRef(1);
   const foodsEatenRef = useRef(0);
   const gameLoopRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
@@ -34,6 +35,7 @@ export function useGameStatus(
     spawnFood(snakeBodyRef.current, 3);
     setScore(0);
     setLevel(1);
+    levelRef.current = 1;
     foodsEatenRef.current = 0;
     currentFpsRef.current = INITIAL_FPS;
     collisionGracePeriodRef.current = false;
@@ -58,7 +60,7 @@ export function useGameStatus(
     console.log("useGameStatus effect - gameStatus:", gameStatus);
     if (gameStatus === "started") {
       console.log("Starting game loop");
-      
+
       let shouldGrow = false;
       lastUpdateRef.current = performance.now();
 
@@ -70,9 +72,9 @@ export function useGameStatus(
           console.log("Game loop tick");
           const result = snakeManagerRef.current.moveSnake(shouldGrow);
           console.log("Move result:", result);
-          
+
           shouldGrow = false;
-          
+
           if (result === "wall-collision" || result === "self-collision") {
             if (collisionGracePeriodRef.current) {
               const container = containerRef.current;
@@ -88,7 +90,7 @@ export function useGameStatus(
               return;
             }
           }
-          
+
           collisionGracePeriodRef.current = false;
 
           const head = snakeManagerRef.current.snakeBodyRef.current[0];
@@ -96,25 +98,31 @@ export function useGameStatus(
             console.log("Food eaten!");
             foodManagerRef.current.removeFood(head);
             shouldGrow = true;
-            
+
             foodsEatenRef.current += 1;
-            
-            if (foodsEatenRef.current >= FOODS_PER_LEVEL) {
-              setLevel((lvl) => {
-                const newLevel = lvl + 1;
+
+            setScore((prev) => {
+              let newScore = prev + levelRef.current;
+              console.log('newscore:', newScore, 'level:');
+              if (foodsEatenRef.current >= FOODS_PER_LEVEL) {
+                newScore--;
+                console.log('newScore after decrement:', newScore);
+                const newLevel = levelRef.current + 1;
+                levelRef.current = newLevel;
+                setLevel(newLevel);
                 currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
                 console.log(`Level up! Level ${newLevel}, FPS: ${currentFpsRef.current}`);
-                return newLevel;
-              });
-              foodsEatenRef.current = 0;
-            }
-            
-            setScore((prev) => prev + level);
-            
-            foodManagerRef.current.spawnFood(
-              snakeManagerRef.current.snakeBodyRef.current,
-              1
-            );
+                foodsEatenRef.current = 0;
+              }
+
+              foodManagerRef.current.spawnFood(
+                snakeManagerRef.current.snakeBodyRef.current,
+                1
+              );
+              console.log('Final newScore to be set:', newScore);
+              return newScore;
+            });
+
           }
 
           lastUpdateRef.current = timestamp;
