@@ -3,6 +3,7 @@ import { useRenderer } from "./useRenderer";
 import { useSnake } from "./useSnake";
 import { useGameStatus } from "./useGameStatus";
 import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
+import { useScore } from "../useScore";
 
 export function useGame(cols: number, rows: number, platformHook?: unknown) {
   const rendererManager = useRenderer();
@@ -21,11 +22,11 @@ export function useGame(cols: number, rows: number, platformHook?: unknown) {
   const keyBindings: UseKeyBindingsType = useKeyBindings({
     gameManager: {
       gameStatus,
-      startGame,
-      stopGame,
       changeDirection,
     },
   });
+
+  const scoreManager = useScore({ gameStatus });
 
   const fullGameManager = {
     containerRef,
@@ -34,6 +35,7 @@ export function useGame(cols: number, rows: number, platformHook?: unknown) {
     stopGame,
     ...snakeManager,
     ...keyBindings,
+    scoreManager,
   };
 
   if (typeof platformHook === "function") {

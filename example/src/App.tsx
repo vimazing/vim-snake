@@ -3,15 +3,33 @@ import "@vimazing/vim-snake/game.css";
 import { useKeyBindings } from "./useKeyBindings";
 
 function App() {
-  const { containerRef, gameStatus } = useGame(30, 20, useKeyBindings);
+  const { containerRef, gameStatus, scoreManager, keyLog } = useGame(30, 20, useKeyBindings);
+
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="relative mx-auto my-4 w-fit space-y-4">
       <h1 className="text-2xl font-bold text-center">VIMazing Snake</h1>
+      
+      <div className="flex gap-4 justify-center text-sm font-mono">
+        <div className="px-3 py-1 bg-muted rounded">
+          Time: {formatTime(scoreManager.timeValue)}
+        </div>
+        <div className="px-3 py-1 bg-muted rounded">
+          Keys: {keyLog.length}
+        </div>
+      </div>
+
       <div ref={containerRef} className="relative" />
+      
       <div className="text-center text-sm text-muted-foreground">
         {gameStatus === "waiting" && <p>Press <kbd className="px-2 py-1 bg-muted rounded">space</kbd> to start</p>}
-        {gameStatus === "started" && <p>Use <kbd className="px-2 py-1 bg-muted rounded">hjkl</kbd> to move • Press <kbd className="px-2 py-1 bg-muted rounded">q</kbd> to quit</p>}
+        {gameStatus === "started" && <p>Use <kbd className="px-2 py-1 bg-muted rounded">hjkl</kbd> to change direction • Press <kbd className="px-2 py-1 bg-muted rounded">q</kbd> to quit</p>}
         {gameStatus === "game-over" && <p>Game Over! Press <kbd className="px-2 py-1 bg-muted rounded">space</kbd> to restart</p>}
       </div>
     </div>

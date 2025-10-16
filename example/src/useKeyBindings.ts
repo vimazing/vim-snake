@@ -5,16 +5,16 @@ export const useKeyBindings = (gameManager: UseGameType) => {
   const { gameStatus, startGame, stopGame, clearLog, resetCount } = gameManager;
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      console.log("key pressed:", e.key, e.code);
+    const handler = (ev: KeyboardEvent) => {
+
       // start game
-      if (e.code === "Space") {
+      if (ev.code === "Space") {
         if (["waiting", "game-over", "game-won"].includes(gameStatus)) {
-          // clearLog();
-          // resetCount();
+          clearLog();
+          resetCount();
           if (gameStatus === "game-over" || gameStatus === "game-won") {
             stopGame();
-            // setTimeout(() => initGame(true), 0);
+            setTimeout(() => startGame(), 0);
           } else {
             startGame();
           }
@@ -22,26 +22,18 @@ export const useKeyBindings = (gameManager: UseGameType) => {
         }
       }
 
-      // ignore other keys while waiting
-      if (gameStatus === "waiting") return;
-
-      // cancel count or stop game
-      if (e.key === "Escape") {
-        stopGame();
-        resetCount();
-        return;
-      }
-
       // quit
-      if (e.key === "q" || e.key === "Q") {
-        stopGame();
-        resetCount();
-        return;
+      if (ev.key === "q" || ev.key === "Q") {
+        if (gameStatus === "started") {
+          stopGame();
+          resetCount();
+          return;
+        }
       }
     };
 
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener("keydown", handler, { capture: true });
+    return () => window.removeEventListener("keydown", handler, { capture: true });
   }, [gameStatus, startGame, stopGame, clearLog, resetCount]);
 };
 
