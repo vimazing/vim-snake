@@ -21,6 +21,9 @@ export function useSnake(
       { r: centerR, c: centerC },
       { r: centerR + 1, c: centerC },
       { r: centerR + 2, c: centerC },
+      { r: centerR + 3, c: centerC },
+      { r: centerR + 4, c: centerC },
+      { r: centerR + 5, c: centerC },
     ];
     
     setSnakeBody(initialBody);
@@ -41,8 +44,8 @@ export function useSnake(
     const container = containerRef.current;
     if (!container) return;
 
-    container.querySelectorAll(".snake-head, .snake-body").forEach((el) => {
-      el.classList.remove("snake-head", "snake-body");
+    container.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el) => {
+      el.classList.remove("snake-head", "snake-body", "snake-tail");
     });
 
     body.forEach((segment, idx) => {
@@ -50,7 +53,13 @@ export function useSnake(
         `.snake-cell[data-r="${segment.r}"][data-c="${segment.c}"]`
       );
       if (cell) {
-        cell.classList.add(idx === 0 ? "snake-head" : "snake-body");
+        if (idx === 0) {
+          cell.classList.add("snake-head");
+        } else if (idx === body.length - 1) {
+          cell.classList.add("snake-tail");
+        } else {
+          cell.classList.add("snake-body");
+        }
       }
     });
   };

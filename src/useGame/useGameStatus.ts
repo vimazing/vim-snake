@@ -30,8 +30,8 @@ export function useGameStatus(
     clearSnake();
     setGameStatus("waiting");
     const container = containerRef.current;
-    container?.querySelectorAll(".snake-head, .snake-body").forEach((el) => {
-      el.classList.remove("snake-head", "snake-body");
+    container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el) => {
+      el.classList.remove("snake-head", "snake-body", "snake-tail");
     });
   };
 
