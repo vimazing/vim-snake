@@ -44,24 +44,55 @@ export function useSnake(
     const container = containerRef.current;
     if (!container) return;
 
-    container.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el) => {
-      el.classList.remove("snake-head", "snake-body", "snake-tail");
-    });
-
+    const dir = directionRef.current;
+    const newPositions = new Set<string>();
+    
+    // First, apply new positions and track them
     body.forEach((segment, idx) => {
+      const posKey = `${segment.r},${segment.c}`;
+      newPositions.add(posKey);
+      
       const cell = container.querySelector(
         `.snake-cell[data-r="${segment.r}"][data-c="${segment.c}"]`
       );
       if (cell) {
+        cell.className = "snake-cell";
         if (idx === 0) {
-          cell.classList.add("snake-head");
+          cell.classList.add("snake-head", `dir-${dir}`);
         } else if (idx === body.length - 1) {
-          cell.classList.add("snake-tail");
+          const tailDir = getTailDirection(body);
+          cell.classList.add("snake-tail", `dir-${tailDir}`);
         } else {
           cell.classList.add("snake-body");
         }
       }
     });
+
+    // Then clear old positions not in the new body
+    const allSnakeCells = container.querySelectorAll(".snake-head, .snake-body, .snake-tail");
+    allSnakeCells.forEach((el) => {
+      const r = el.getAttribute("data-r");
+      const c = el.getAttribute("data-c");
+      const posKey = `${r},${c}`;
+      if (!newPositions.has(posKey)) {
+        el.className = "snake-cell";
+      }
+    });
+  };
+
+  const getTailDirection = (body: SnakeBody): Direction => {
+    if (body.length < 2) return directionRef.current;
+    
+    const tail = body[body.length - 1];
+    const beforeTail = body[body.length - 2];
+    
+    // Tail points away from beforeTail
+    if (tail.r < beforeTail.r) return "up";
+    if (tail.r > beforeTail.r) return "down";
+    if (tail.c < beforeTail.c) return "left";
+    if (tail.c > beforeTail.c) return "right";
+    
+    return directionRef.current;
   };
 
   const changeDirection = (newDirection: Direction) => {

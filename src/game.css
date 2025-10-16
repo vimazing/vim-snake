@@ -37,11 +37,26 @@
    ========================================================= */
 .snake-cell.snake-head {
   background-color: var(--accent, #ffc777);
-  border-radius: 6px 6px 2px 2px;
   box-shadow: 
     0 0 8px color-mix(in srgb, var(--accent, #ffc777) 70%, transparent),
     inset 0 0 4px color-mix(in srgb, var(--accent, #ffc777) 90%, transparent);
   position: relative;
+}
+
+.snake-cell.snake-head.dir-up {
+  border-radius: 6px 6px 2px 2px;
+}
+
+.snake-cell.snake-head.dir-down {
+  border-radius: 2px 2px 6px 6px;
+}
+
+.snake-cell.snake-head.dir-left {
+  border-radius: 6px 2px 2px 6px;
+}
+
+.snake-cell.snake-head.dir-right {
+  border-radius: 2px 6px 6px 2px;
 }
 
 .snake-cell.snake-head::after {
@@ -65,7 +80,22 @@
 .snake-cell.snake-tail {
   background-color: var(--accent, #ffc777);
   opacity: 0.5;
-  border-radius: 2px 2px 6px 6px;
   box-shadow: 0 0 4px color-mix(in srgb, var(--accent, #ffc777) 40%, transparent);
+}
+
+.snake-cell.snake-tail.dir-up {
+  border-radius: 6px 6px 2px 2px;
+}
+
+.snake-cell.snake-tail.dir-down {
+  border-radius: 2px 2px 6px 6px;
+}
+
+.snake-cell.snake-tail.dir-left {
+  border-radius: 6px 2px 2px 6px;
+}
+
+.snake-cell.snake-tail.dir-right {
+  border-radius: 2px 6px 6px 2px;
 }
 
