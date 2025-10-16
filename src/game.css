@@ -99,3 +99,24 @@
   border-radius: 2px 6px 6px 2px;
 }
 
+/* =========================================================
+   Food Rendering
+   ========================================================= */
+.snake-cell.food {
+  background-color: var(--chart-2, #c3e88d);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 8px color-mix(in srgb, var(--chart-2, #c3e88d) 60%, transparent),
+    inset 0 0 4px color-mix(in srgb, var(--chart-2, #c3e88d) 80%, transparent);
+  position: relative;
+}
+
+.snake-cell.food::after {
+  content: "🍎";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+}
+

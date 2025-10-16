@@ -21,9 +21,6 @@ export function useSnake(
       { r: centerR, c: centerC },
       { r: centerR + 1, c: centerC },
       { r: centerR + 2, c: centerC },
-      { r: centerR + 3, c: centerC },
-      { r: centerR + 4, c: centerC },
-      { r: centerR + 5, c: centerC },
     ];
     
     setSnakeBody(initialBody);
@@ -109,7 +106,7 @@ export function useSnake(
     }
   };
 
-  const moveSnake = (): "continue" | "wall-collision" | "self-collision" => {
+  const moveSnake = (grow: boolean = false): "continue" | "wall-collision" | "self-collision" => {
     const body = snakeBodyRef.current;
     if (body.length === 0) return "continue";
 
@@ -139,7 +136,9 @@ export function useSnake(
     }
 
     const newHead = { r: newR, c: newC };
-    const newBody = [newHead, ...body.slice(0, -1)];
+    const newBody = grow 
+      ? [newHead, ...body]
+      : [newHead, ...body.slice(0, -1)];
 
     setSnakeBody(newBody);
     snakeBodyRef.current = newBody;

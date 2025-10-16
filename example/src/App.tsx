@@ -3,7 +3,7 @@ import "@vimazing/vim-snake/game.css";
 import { useKeyBindings } from "./useKeyBindings";
 
 function App() {
-  const { containerRef, gameStatus, scoreManager, keyLog } = useGame(30, 20, useKeyBindings);
+  const { containerRef, gameStatus, scoreManager, keyLog, score } = useGame(30, 20, useKeyBindings);
 
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -19,6 +19,9 @@ function App() {
       <div className="flex gap-4 justify-center text-sm font-mono">
         <div className="px-3 py-1 bg-muted rounded">
           Time: {formatTime(scoreManager.timeValue)}
+        </div>
+        <div className="px-3 py-1 bg-muted rounded">
+          Score: {score}
         </div>
         <div className="px-3 py-1 bg-muted rounded">
           Keys: {keyLog.length}
