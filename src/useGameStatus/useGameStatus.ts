@@ -26,7 +26,6 @@ export function useGameStatus(
   const snakeManagerRef = useRef(snakeManager);
   const foodManagerRef = useRef(foodManager);
   const currentFpsRef = useRef(INITIAL_FPS);
-  const collisionGracePeriodRef = useRef(false);
 
   snakeManagerRef.current = snakeManager;
   foodManagerRef.current = foodManager;
@@ -39,7 +38,6 @@ export function useGameStatus(
     levelRef.current = 1;
     foodsEatenRef.current = 0;
     currentFpsRef.current = INITIAL_FPS;
-    collisionGracePeriodRef.current = false;
     setGameStatus("started");
   };
 
@@ -58,9 +56,7 @@ export function useGameStatus(
   };
 
   useEffect(() => {
-    console.log("useGameStatus effect - gameStatus:", gameStatus);
     if (gameStatus === "started") {
-      console.log("Starting game loop");
       if (paused) return;
       let shouldGrow = false;
       lastUpdateRef.current = performance.now();
@@ -70,33 +66,24 @@ export function useGameStatus(
         const elapsed = timestamp - lastUpdateRef.current;
 
         if (elapsed >= msPerFrame) {
-          console.log("Game loop tick");
           const result = snakeManagerRef.current.moveSnake(shouldGrow);
-          console.log("Move result:", result);
 
           shouldGrow = false;
 
           if (result === "wall-collision" || result === "self-collision") {
-            if (collisionGracePeriodRef.current) {
-               const container = containerRef.current;
-               container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el: Element) => {
-                 (el as HTMLElement).classList.add("collision");
-               });
-              setGameStatus("game-over");
-              return;
-            } else {
-              collisionGracePeriodRef.current = true;
-              lastUpdateRef.current = timestamp;
-              gameLoopRef.current = requestAnimationFrame(gameLoop);
-              return;
-            }
+            const container = containerRef.current;
+            container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el: Element) => {
+              (el as HTMLElement).classList.add("collision");
+            });
+            setGameStatus("game-over");
+            return;
           }
 
-          collisionGracePeriodRef.current = false;
+          // Apply any buffered direction input for next frame
+          snakeManagerRef.current.applyBufferedDirection();
 
           const head = snakeManagerRef.current.snakeBodyRef.current[0];
           if (head && foodManagerRef.current.checkFoodCollision(head)) {
-            console.log("Food eaten!");
             foodManagerRef.current.removeFood(head);
             shouldGrow = true;
 
@@ -104,15 +91,12 @@ export function useGameStatus(
 
             setScore((prev) => {
               let newScore = prev + levelRef.current;
-              console.log('newscore:', newScore, 'level:');
               if (foodsEatenRef.current >= FOODS_PER_LEVEL) {
                 newScore--;
-                console.log('newScore after decrement:', newScore);
                 const newLevel = levelRef.current + 1;
                 levelRef.current = newLevel;
                 setLevel(newLevel);
                 currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
-                console.log(`Level up! Level ${newLevel}, FPS: ${currentFpsRef.current}`);
                 foodsEatenRef.current = 0;
               }
 
@@ -120,7 +104,6 @@ export function useGameStatus(
                 snakeManagerRef.current.snakeBodyRef.current,
                 1
               );
-              console.log('Final newScore to be set:', newScore);
               return newScore;
             });
 
@@ -135,7 +118,6 @@ export function useGameStatus(
       gameLoopRef.current = requestAnimationFrame(gameLoop);
 
       return () => {
-        console.log("Cleaning up game loop");
         if (gameLoopRef.current) {
           cancelAnimationFrame(gameLoopRef.current);
           gameLoopRef.current = null;

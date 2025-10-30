@@ -13,6 +13,7 @@ export function useCursor(
   const [direction, setDirection] = useState<Direction>("up");
   const directionRef = useRef<Direction>("up");
   const lastMovedDirectionRef = useRef<Direction>("up");
+  const nextDirectionRef = useRef<Direction | null>(null);
 
   const initSnake = () => {
     const centerR = Math.floor(rows / 2);
@@ -103,9 +104,29 @@ export function useCursor(
       right: "left",
     };
 
+    // Buffer the direction instead of applying immediately
+    // Only buffer if it's not a 180° reversal of the last MOVED direction
+    if (opposites[lastMovedDirectionRef.current] !== newDirection) {
+      nextDirectionRef.current = newDirection;
+    }
+  };
+
+  const applyBufferedDirection = () => {
+    if (nextDirectionRef.current === null) return;
+
+    const newDirection = nextDirectionRef.current;
+    const opposites: Record<Direction, Direction> = {
+      up: "down",
+      down: "up",
+      left: "right",
+      right: "left",
+    };
+
+    // Apply buffer only if still valid (not 180° reversal)
     if (opposites[lastMovedDirectionRef.current] !== newDirection) {
       setDirection(newDirection);
       directionRef.current = newDirection;
+      nextDirectionRef.current = null;
     }
   };
 
@@ -237,6 +258,7 @@ export function useCursor(
     initSnake,
     clearSnake,
     changeDirection,
+    applyBufferedDirection,
     moveSnake,
     renderSnake,
   };
