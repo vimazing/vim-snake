@@ -158,6 +158,7 @@ export function useGameStatus(
     setGameStatus,
     startGame,
     stopGame,
+    quitGame: stopGame,
     paused,
     togglePause: () => setPaused(curr => !curr),
     score,

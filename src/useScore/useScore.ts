@@ -14,6 +14,8 @@ export function useScore({ gameStatus }: UseScoreParams) {
 
   return {
     timeValue,
+    totalKeystrokes: 0, // TODO: Track from keyBindings
+    finalScore: null,   // TODO: Calculate on game-won
     startTimer,
     stopTimer,
     resetTimer,

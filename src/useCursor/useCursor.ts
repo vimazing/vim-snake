@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { Direction, SnakeBody } from "../types";
+import type { Direction, SnakeBody, Position } from "../types";
 import type { UseBoardType } from "../useBoard";
 
 export function useCursor(
@@ -163,7 +163,73 @@ export function useCursor(
     return "continue";
   };
 
+  // Unified API compliant methods
+  const position = (): Position => {
+    const head = snakeBodyRef.current[0];
+    return head || { r: 0, c: 0 };
+  };
+
+  const mode = () => 'normal' as const;
+
+  const moveLeft = (_count?: number) => {
+    changeDirection('left');
+  };
+
+  const moveRight = (_count?: number) => {
+    changeDirection('right');
+  };
+
+  const moveUp = (_count?: number) => {
+    changeDirection('up');
+  };
+
+  const moveDown = (_count?: number) => {
+    changeDirection('down');
+  };
+
+  const moveToStart = () => {
+    // Snake-specific: move to leftmost position on current row
+    changeDirection('left');
+  };
+
+  const moveToEnd = () => {
+    // Snake-specific: move to rightmost position on current row
+    changeDirection('right');
+  };
+
+  const moveToTop = () => {
+    // Snake-specific: move to top of board
+    changeDirection('up');
+  };
+
+  const moveToBottom = () => {
+    // Snake-specific: move to bottom of board
+    changeDirection('down');
+  };
+
+  const lastMotionRef = useRef<Direction | null>(null);
+
+  const repeatLastMotion = () => {
+    if (lastMotionRef.current) {
+      changeDirection(lastMotionRef.current);
+    }
+  };
+
   return {
+    // Unified API methods
+    position,
+    mode,
+    moveLeft,
+    moveRight,
+    moveUp,
+    moveDown,
+    moveToStart,
+    moveToEnd,
+    moveToTop,
+    moveToBottom,
+    repeatLastMotion,
+
+    // Snake-specific methods (with proper values)
     snakeBody,
     snakeBodyRef,
     direction,

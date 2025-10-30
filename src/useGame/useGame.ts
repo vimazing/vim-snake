@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import type { GameManager, GameOptions } from "../types";
 import { useBoard } from "../useBoard";
 import { useCursor } from "../useCursor";
 import { useFood } from "./useFood";
@@ -6,7 +7,23 @@ import { useGameStatus } from "../useGameStatus";
 import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
 import { useScore } from "../useScore";
 
-export function useGame(cols: number, rows: number, platformHook?: unknown) {
+export function useGame(optionsOrCols: GameOptions | number, rows?: number, platformHook?: unknown): GameManager {
+  // Support both old signature (cols, rows) and new signature (options)
+  let cols: number;
+  let actualPlatformHook = platformHook;
+
+  if (typeof optionsOrCols === 'object') {
+    // New signature: useGame(options, platformHook)
+    const options = optionsOrCols as GameOptions;
+    cols = options.cols;
+    rows = options.rows;
+    actualPlatformHook = rows as unknown as typeof platformHook;
+  } else {
+    // Old signature: useGame(cols, rows, platformHook)
+    cols = optionsOrCols;
+    rows = rows || 20;
+  }
+
   const boardManager = useBoard();
   const { containerRef, renderBoard } = boardManager;
 
@@ -16,7 +33,7 @@ export function useGame(cols: number, rows: number, platformHook?: unknown) {
   const foodManager = useFood(cols, rows, boardManager);
 
   const gameManager = useGameStatus(boardManager, snakeManager, foodManager);
-  const { gameStatus, startGame, stopGame, togglePause, score, level } = gameManager;
+  const { gameStatus, setGameStatus, startGame, quitGame, togglePause, score, level } = gameManager;
 
   useEffect(() => {
     renderBoard(cols, rows);
@@ -31,25 +48,45 @@ export function useGame(cols: number, rows: number, platformHook?: unknown) {
 
   const scoreManager = useScore({ gameStatus });
 
-  const fullGameManager = {
-    containerRef,
-    gameStatus,
-    startGame,
-    stopGame,
-    togglePause,
-    score,
-    level,
-    ...snakeManager,
-    ...foodManager,
-    ...keyBindings,
-    scoreManager,
+  // Wrap renderBoard to match Unified API signature
+  const renderBoardWrapped = () => {
+    renderBoard(cols, rows);
   };
 
-  if (typeof platformHook === "function") {
-    platformHook(fullGameManager);
+  // Build Unified API compliant GameManager
+  const gameManagerResult: GameManager = {
+    // Required rendering
+    containerRef,
+    renderBoard: renderBoardWrapped,
+
+    // Required managers
+    cursor: snakeManager,
+    scoreManager,
+
+    // Required lifecycle
+    gameStatus,
+    setGameStatus,
+    startGame,
+    quitGame,
+
+    // Required state
+    level,
+    score,
+
+    // Required key tracking
+    keyLog: keyBindings.keyLog,
+    clearKeyLog: keyBindings.clearLog,
+    getKeyLog: keyBindings.getLog,
+
+    // Game-specific additions
+    togglePause,
+  };
+
+  if (typeof actualPlatformHook === "function") {
+    actualPlatformHook(gameManagerResult);
   }
 
-  return fullGameManager;
+  return gameManagerResult;
 }
 
 export type { GameStatus } from "../types";
