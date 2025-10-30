@@ -94,22 +94,22 @@ export function useGameStatus(
 
              console.log(`[FOOD] Eaten: ${foodsEatenRef.current}, Will Level Up: ${willLevelUp}, Current Level: ${levelRef.current}`);
 
+             // Save the current level BEFORE any changes
+             const pointsToAdd = levelRef.current;
+             
+             // Update level OUTSIDE of setScore to avoid multiple triggers
+             if (willLevelUp) {
+               const newLevel = levelRef.current + 1;
+               levelRef.current = newLevel;
+               setLevel(newLevel);
+               currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
+               foodsEatenRef.current = 0;
+               console.log(`[LEVELUP] New Level: ${newLevel}`);
+             }
+
              setScore((prev) => {
-               // Save the current level BEFORE any changes
-               const pointsToAdd = levelRef.current;
-               
                // Add points at CURRENT level
                let newScore = prev + pointsToAdd;
-               
-               // Level up AFTER this food if threshold was reached
-               if (willLevelUp) {
-                 const newLevel = levelRef.current + 1;
-                 levelRef.current = newLevel;
-                 setLevel(newLevel);
-                 currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
-                 foodsEatenRef.current = 0;
-                 console.log(`[LEVELUP] New Level: ${newLevel}`);
-               }
 
                console.log(`[SCORE] Adding ${pointsToAdd} points, Total: ${newScore}`);
 
