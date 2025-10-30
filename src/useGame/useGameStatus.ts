@@ -4,7 +4,7 @@ import type { UseRendererType } from "./useRenderer";
 import type { UseSnakeType } from "./useSnake";
 import type { UseFoodType } from "./useFood";
 
-const INITIAL_FPS = 5;
+const INITIAL_FPS = 12;
 const FOODS_PER_LEVEL = 2;
 
 export function useGameStatus(
