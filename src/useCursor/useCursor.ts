@@ -97,18 +97,8 @@ export function useCursor(
   };
 
   const changeDirection = (newDirection: Direction) => {
-    const opposites: Record<Direction, Direction> = {
-      up: "down",
-      down: "up",
-      left: "right",
-      right: "left",
-    };
-
-    // Buffer the direction instead of applying immediately
-    // Only buffer if it's not a 180° reversal of the last MOVED direction
-    if (opposites[lastMovedDirectionRef.current] !== newDirection) {
-      nextDirectionRef.current = newDirection;
-    }
+    // Simply buffer the direction - apply validation on next move
+    nextDirectionRef.current = newDirection;
   };
 
   const applyBufferedDirection = () => {
@@ -122,8 +112,9 @@ export function useCursor(
       right: "left",
     };
 
-    // Apply buffer only if still valid (not 180° reversal)
-    if (opposites[lastMovedDirectionRef.current] !== newDirection) {
+    // Only prevent immediate 180° reversal (would cause self-collision on same frame)
+    // This is the CURRENT direction, not the last moved direction
+    if (opposites[directionRef.current] !== newDirection) {
       setDirection(newDirection);
       directionRef.current = newDirection;
       nextDirectionRef.current = null;
