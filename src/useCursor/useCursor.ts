@@ -19,14 +19,11 @@ export function useCursor(
      const centerR = Math.floor(rows / 2);
      const centerC = Math.floor(cols / 2);
      
-     const initialBody: SnakeBody = [
-       { r: centerR, c: centerC },
-       { r: centerR + 1, c: centerC },
-       { r: centerR + 2, c: centerC },
-       { r: centerR + 3, c: centerC },
-       { r: centerR + 4, c: centerC },
-       { r: centerR + 5, c: centerC },
-     ];
+      const initialBody: SnakeBody = [
+        { r: centerR, c: centerC },
+        { r: centerR + 1, c: centerC },
+        { r: centerR + 2, c: centerC },
+      ];
     
     setSnakeBody(initialBody);
     snakeBodyRef.current = initialBody;
