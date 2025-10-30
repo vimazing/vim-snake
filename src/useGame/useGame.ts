@@ -1,21 +1,21 @@
 import { useEffect } from "react";
-import { useRenderer } from "./useRenderer";
-import { useSnake } from "./useSnake";
+import { useBoard } from "../useBoard";
+import { useCursor } from "../useCursor";
 import { useFood } from "./useFood";
-import { useGameStatus } from "./useGameStatus";
+import { useGameStatus } from "../useGameStatus";
 import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
 import { useScore } from "../useScore";
 
 export function useGame(cols: number, rows: number, platformHook?: unknown) {
-  const rendererManager = useRenderer();
-  const { containerRef, renderBoard } = rendererManager;
+  const boardManager = useBoard();
+  const { containerRef, renderBoard } = boardManager;
 
-  const snakeManager = useSnake(cols, rows, rendererManager);
+  const snakeManager = useCursor(cols, rows, boardManager);
   const { changeDirection } = snakeManager;
 
-  const foodManager = useFood(cols, rows, rendererManager);
+  const foodManager = useFood(cols, rows, boardManager);
 
-  const gameManager = useGameStatus(rendererManager, snakeManager, foodManager);
+  const gameManager = useGameStatus(boardManager, snakeManager, foodManager);
   const { gameStatus, startGame, stopGame, togglePause, score, level } = gameManager;
 
   useEffect(() => {
