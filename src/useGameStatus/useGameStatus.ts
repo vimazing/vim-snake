@@ -82,32 +82,35 @@ export function useGameStatus(
             return;
           }
 
-          const head = snakeManagerRef.current.snakeBodyRef.current[0];
-          if (head && foodManagerRef.current.checkFoodCollision(head)) {
-            foodManagerRef.current.removeFood(head);
-            shouldGrow = true;
+           const head = snakeManagerRef.current.snakeBodyRef.current[0];
+           if (head && foodManagerRef.current.checkFoodCollision(head)) {
+             foodManagerRef.current.removeFood(head);
+             shouldGrow = true;
 
-            foodsEatenRef.current += 1;
+             // Check BEFORE incrementing if we're about to level up
+             const willLevelUp = (foodsEatenRef.current + 1) >= FOODS_PER_LEVEL;
 
-            setScore((prev) => {
-              // Add points at CURRENT level first
-              let newScore = prev + levelRef.current;
-              
-              // THEN check if we should level up for NEXT food
-              if (foodsEatenRef.current >= FOODS_PER_LEVEL) {
-                const newLevel = levelRef.current + 1;
-                levelRef.current = newLevel;
-                setLevel(newLevel);
-                currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
-                foodsEatenRef.current = 0;
-              }
+             foodsEatenRef.current += 1;
 
-              foodManagerRef.current.spawnFood(
-                snakeManagerRef.current.snakeBodyRef.current,
-                1
-              );
-              return newScore;
-            });
+             setScore((prev) => {
+               // Add points at CURRENT level
+               let newScore = prev + levelRef.current;
+               
+               // Level up AFTER this food if threshold was reached
+               if (willLevelUp) {
+                 const newLevel = levelRef.current + 1;
+                 levelRef.current = newLevel;
+                 setLevel(newLevel);
+                 currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
+                 foodsEatenRef.current = 0;
+               }
+
+               foodManagerRef.current.spawnFood(
+                 snakeManagerRef.current.snakeBodyRef.current,
+                 1
+               );
+               return newScore;
+             });
 
           }
 
