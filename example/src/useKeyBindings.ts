@@ -1,19 +1,18 @@
 import { useEffect } from "react";
-import type { UseGameType } from "@vimazing/vim-snake";
+import type { GameManager } from "../../src";
 
-export const useKeyBindings = (gameManager: UseGameType) => {
-  const { gameStatus, startGame, stopGame, clearLog, resetCount, togglePause } = gameManager;
+export const useKeyBindings = (gameManager: GameManager) => {
+  const { gameStatus, renderBoard, startGame, quitGame, clearKeyLog } = gameManager;
 
   useEffect(() => {
     const handler = (ev: KeyboardEvent) => {
-
       // start game
       if (ev.code === "Space") {
         if (["waiting", "game-over", "game-won"].includes(gameStatus)) {
-          clearLog();
-          resetCount();
+          clearKeyLog();
+          renderBoard();
           if (gameStatus === "game-over" || gameStatus === "game-won") {
-            stopGame();
+            quitGame();
             setTimeout(() => startGame(), 0);
           } else {
             startGame();
@@ -22,24 +21,18 @@ export const useKeyBindings = (gameManager: UseGameType) => {
         }
       }
 
-      console.log('ev.key', ev.key)
-
-      if (ev.key === 'p' || ev.key === 'P') {
-        togglePause();
-      }
+      // ignore other keys while waiting
+      if (gameStatus === "waiting") return;
 
       // quit
       if (ev.key === "q" || ev.key === "Q") {
-        if (gameStatus === "started") {
-          stopGame();
-          resetCount();
-          return;
-        }
+        quitGame();
+        return;
       }
     };
 
-    window.addEventListener("keydown", handler, { capture: true });
-    return () => window.removeEventListener("keydown", handler, { capture: true });
-  }, [gameStatus, startGame, stopGame, clearLog, resetCount]);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [gameStatus]);
 };
 
