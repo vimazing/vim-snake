@@ -27,8 +27,13 @@ function App() {
           Score: {score}
         </div>
         <div className="px-3 py-1 bg-muted rounded">
-          Keys: {keyLog.length}
+          Keystrokes: {scoreManager.totalKeystrokes}
         </div>
+        {scoreManager.finalScore !== null && (
+          <div className="px-3 py-1 bg-muted rounded font-bold">
+            Final Score: {scoreManager.finalScore}
+          </div>
+        )}
       </div>
 
       <div ref={containerRef} className="relative" />
@@ -37,6 +42,7 @@ function App() {
         {gameStatus === "waiting" && <p>Press <kbd className="px-2 py-1 bg-muted rounded">space</kbd> to start</p>}
         {gameStatus === "started" && <p>Use <kbd className="px-2 py-1 bg-muted rounded">hjkl</kbd> to change direction • Press <kbd className="px-2 py-1 bg-muted rounded">q</kbd> to quit</p>}
         {gameStatus === "game-over" && <p>Game Over! Press <kbd className="px-2 py-1 bg-muted rounded">space</kbd> to restart</p>}
+        {gameStatus === "game-won" && <p>You Won! Press <kbd className="px-2 py-1 bg-muted rounded">space</kbd> to restart</p>}
       </div>
     </div>
   );
