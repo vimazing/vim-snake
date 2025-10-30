@@ -4,8 +4,8 @@ import type { UseBoardType } from "../useBoard";
 import type { UseCursorType } from "../useCursor";
 import type { UseFoodType } from "../useGame/useFood";
 
-const INITIAL_FPS = 12;
-const FOODS_PER_LEVEL = 2;
+const INITIAL_FPS = 5;
+const FOODS_PER_LEVEL = 1;
 
 export function useGameStatus(
   boardManager: UseBoardType,
@@ -92,6 +92,8 @@ export function useGameStatus(
 
              foodsEatenRef.current += 1;
 
+             console.log(`[FOOD] Eaten: ${foodsEatenRef.current}, Will Level Up: ${willLevelUp}, Current Level: ${levelRef.current}`);
+
              setScore((prev) => {
                // Add points at CURRENT level
                let newScore = prev + levelRef.current;
@@ -103,7 +105,10 @@ export function useGameStatus(
                  setLevel(newLevel);
                  currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
                  foodsEatenRef.current = 0;
+                 console.log(`[LEVELUP] New Level: ${newLevel}`);
                }
+
+               console.log(`[SCORE] Adding ${levelRef.current} points, Total: ${newScore}`);
 
                foodManagerRef.current.spawnFood(
                  snakeManagerRef.current.snakeBodyRef.current,
