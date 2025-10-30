@@ -18,6 +18,7 @@ export function useGameStatus(
   const [gameStatus, setGameStatus] = useState<GameStatus>("waiting");
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
+  const [paused, setPaused] = useState(false);
   const levelRef = useRef(1);
   const foodsEatenRef = useRef(0);
   const gameLoopRef = useRef<number | null>(null);
@@ -60,7 +61,7 @@ export function useGameStatus(
     console.log("useGameStatus effect - gameStatus:", gameStatus);
     if (gameStatus === "started") {
       console.log("Starting game loop");
-
+      if (paused) return;
       let shouldGrow = false;
       lastUpdateRef.current = performance.now();
 
@@ -141,7 +142,7 @@ export function useGameStatus(
         }
       };
     }
-  }, [gameStatus]);
+  }, [gameStatus, paused]);
 
   useEffect(() => {
     if (gameStatus === "game-over") {
@@ -157,6 +158,8 @@ export function useGameStatus(
     setGameStatus,
     startGame,
     stopGame,
+    paused,
+    togglePause: () => setPaused(curr => !curr),
     score,
     level,
   };

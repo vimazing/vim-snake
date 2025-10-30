@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import type { UseGameType } from "@vimazing/vim-snake";
 
 export const useKeyBindings = (gameManager: UseGameType) => {
-  const { gameStatus, startGame, stopGame, clearLog, resetCount } = gameManager;
+  const { gameStatus, startGame, stopGame, clearLog, resetCount, togglePause } = gameManager;
 
   useEffect(() => {
     const handler = (ev: KeyboardEvent) => {
@@ -20,6 +20,12 @@ export const useKeyBindings = (gameManager: UseGameType) => {
           }
           return;
         }
+      }
+
+      console.log('ev.key', ev.key)
+
+      if (ev.key === 'p' || ev.key === 'P') {
+        togglePause();
       }
 
       // quit

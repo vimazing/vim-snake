@@ -16,7 +16,7 @@ export function useGame(cols: number, rows: number, platformHook?: unknown) {
   const foodManager = useFood(cols, rows, rendererManager);
 
   const gameManager = useGameStatus(rendererManager, snakeManager, foodManager);
-  const { gameStatus, startGame, stopGame, score, level } = gameManager;
+  const { gameStatus, startGame, stopGame, togglePause, score, level } = gameManager;
 
   useEffect(() => {
     renderBoard(cols, rows);
@@ -36,6 +36,7 @@ export function useGame(cols: number, rows: number, platformHook?: unknown) {
     gameStatus,
     startGame,
     stopGame,
+    togglePause,
     score,
     level,
     ...snakeManager,
