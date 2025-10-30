@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
 import type { Position, SnakeBody } from "../types";
-import type { UseRendererType } from "./useRenderer";
+import type { UseBoardType } from "../useBoard";
 
 export function useFood(
   cols: number,
   rows: number,
-  rendererManager: UseRendererType
+  boardManager: UseBoardType
 ) {
-  const { containerRef } = rendererManager;
+  const { containerRef } = boardManager;
   const [foodPositions, setFoodPositions] = useState<Position[]>([]);
   const foodPositionsRef = useRef<Position[]>([]);
 
@@ -38,22 +38,22 @@ export function useFood(
     renderFood(newFood);
   };
 
-  const clearFood = () => {
-    setFoodPositions([]);
-    foodPositionsRef.current = [];
-    const container = containerRef.current;
-    container?.querySelectorAll(".food").forEach((el) => {
-      el.classList.remove("food");
-    });
-  };
+   const clearFood = () => {
+     setFoodPositions([]);
+     foodPositionsRef.current = [];
+     const container = containerRef.current;
+     container?.querySelectorAll(".food").forEach((el: Element) => {
+       (el as HTMLElement).classList.remove("food");
+     });
+   };
 
-  const renderFood = (positions: Position[]) => {
-    const container = containerRef.current;
-    if (!container) return;
+   const renderFood = (positions: Position[]) => {
+     const container = containerRef.current;
+     if (!container) return;
 
-    container.querySelectorAll(".food").forEach((el) => {
-      el.classList.remove("food");
-    });
+     container.querySelectorAll(".food").forEach((el: Element) => {
+       (el as HTMLElement).classList.remove("food");
+     });
 
     positions.forEach((pos) => {
       const cell = container.querySelector(
