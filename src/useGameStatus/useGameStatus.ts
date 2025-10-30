@@ -90,14 +90,20 @@ export function useGameStatus(
             foodsEatenRef.current += 1;
 
             setScore((prev) => {
-              let newScore = prev + levelRef.current;
+              let newScore = prev;
+              let currentLevel = levelRef.current;
+              
+              // Check if we should level up BEFORE adding points
               if (foodsEatenRef.current >= FOODS_PER_LEVEL) {
-                const newLevel = levelRef.current + 1;
-                levelRef.current = newLevel;
-                setLevel(newLevel);
-                currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
+                currentLevel = levelRef.current + 1;
+                levelRef.current = currentLevel;
+                setLevel(currentLevel);
+                currentFpsRef.current = INITIAL_FPS + (currentLevel - 1);
                 foodsEatenRef.current = 0;
               }
+              
+              // Add points at the current (possibly new) level
+              newScore = prev + currentLevel;
 
               foodManagerRef.current.spawnFood(
                 snakeManagerRef.current.snakeBodyRef.current,
