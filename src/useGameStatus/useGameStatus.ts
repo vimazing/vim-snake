@@ -66,6 +66,9 @@ export function useGameStatus(
         const elapsed = timestamp - lastUpdateRef.current;
 
         if (elapsed >= msPerFrame) {
+          // Apply any buffered direction input BEFORE moving
+          snakeManagerRef.current.applyBufferedDirection();
+
           const result = snakeManagerRef.current.moveSnake(shouldGrow);
 
           shouldGrow = false;
@@ -78,9 +81,6 @@ export function useGameStatus(
             setGameStatus("game-over");
             return;
           }
-
-          // Apply any buffered direction input for next frame
-          snakeManagerRef.current.applyBufferedDirection();
 
           const head = snakeManagerRef.current.snakeBodyRef.current[0];
           if (head && foodManagerRef.current.checkFoodCollision(head)) {
