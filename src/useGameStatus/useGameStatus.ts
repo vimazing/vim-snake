@@ -90,28 +90,23 @@ export function useGameStatus(
              // Check BEFORE incrementing if we're about to level up
              const willLevelUp = (foodsEatenRef.current + 1) >= FOODS_PER_LEVEL;
 
-             foodsEatenRef.current += 1;
+              foodsEatenRef.current += 1;
 
-             console.log(`[FOOD] Eaten: ${foodsEatenRef.current}, Will Level Up: ${willLevelUp}, Current Level: ${levelRef.current}`);
+              // Save the current level BEFORE any changes
+              const pointsToAdd = levelRef.current;
+              
+              // Update level OUTSIDE of setScore to avoid multiple triggers
+              if (willLevelUp) {
+                const newLevel = levelRef.current + 1;
+                levelRef.current = newLevel;
+                setLevel(newLevel);
+                currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
+                foodsEatenRef.current = 0;
+              }
 
-             // Save the current level BEFORE any changes
-             const pointsToAdd = levelRef.current;
-             
-             // Update level OUTSIDE of setScore to avoid multiple triggers
-             if (willLevelUp) {
-               const newLevel = levelRef.current + 1;
-               levelRef.current = newLevel;
-               setLevel(newLevel);
-               currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
-               foodsEatenRef.current = 0;
-               console.log(`[LEVELUP] New Level: ${newLevel}`);
-             }
-
-             setScore((prev) => {
-               // Add points at CURRENT level
-               let newScore = prev + pointsToAdd;
-
-               console.log(`[SCORE] Adding ${pointsToAdd} points, Total: ${newScore}`);
+              setScore((prev) => {
+                // Add points at CURRENT level
+                let newScore = prev + pointsToAdd;
 
                foodManagerRef.current.spawnFood(
                  snakeManagerRef.current.snakeBodyRef.current,
