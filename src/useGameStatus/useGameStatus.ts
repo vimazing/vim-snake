@@ -92,7 +92,6 @@ export function useGameStatus(
             setScore((prev) => {
               let newScore = prev + levelRef.current;
               if (foodsEatenRef.current >= FOODS_PER_LEVEL) {
-                newScore--;
                 const newLevel = levelRef.current + 1;
                 levelRef.current = newLevel;
                 setLevel(newLevel);
