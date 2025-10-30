@@ -5,7 +5,7 @@ import type { UseCursorType } from "../useCursor";
 import type { UseFoodType } from "../useGame/useFood";
 
 const INITIAL_FPS = 5;
-const FOODS_PER_LEVEL = 1;
+const FOODS_PER_LEVEL = 2;
 
 export function useGameStatus(
   boardManager: UseBoardType,
