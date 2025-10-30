@@ -46,7 +46,7 @@ export function useGame(optionsOrCols: GameOptions | number, rows?: number, plat
     },
   });
 
-  const scoreManager = useScore({ gameStatus });
+  const scoreManager = useScore({ gameStatus, keyLog: keyBindings.keyLog });
 
   // Wrap renderBoard to match Unified API signature
   const renderBoardWrapped = () => {

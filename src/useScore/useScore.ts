@@ -1,12 +1,13 @@
 import { useTimer } from "./hooks/useTimer";
 import { useScoreTime } from "./useScoreTime";
-import type { GameStatus } from "../types";
+import type { GameStatus, KeyLogEntry } from "../types";
 
 export type UseScoreParams = {
   gameStatus: GameStatus;
+  keyLog: KeyLogEntry[];
 };
 
-export function useScore({ gameStatus }: UseScoreParams) {
+export function useScore({ gameStatus, keyLog }: UseScoreParams) {
   const timer = useTimer();
   const { timeValue, startTimer, stopTimer, resetTimer } = timer;
 
@@ -14,7 +15,7 @@ export function useScore({ gameStatus }: UseScoreParams) {
 
   return {
     timeValue,
-    totalKeystrokes: 0, // TODO: Track from keyBindings
+    totalKeystrokes: keyLog.length,
     finalScore: null,   // TODO: Calculate on game-won
     startTimer,
     stopTimer,
