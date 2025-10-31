@@ -7,6 +7,7 @@ import type { UseFoodType } from "../useGame/useFood";
 export type UseGameStatusParams = {
   startingLevel?: number;
   foodsPerLevel?: number;
+  maxLevel?: number;
 };
 
 export function useGameStatus(
@@ -17,6 +18,7 @@ export function useGameStatus(
 ) {
   const startingLevel = params?.startingLevel ?? 1;
   const foodsPerLevel = params?.foodsPerLevel ?? 10;
+  const maxLevel = params?.maxLevel ?? 25;
   const { containerRef } = boardManager;
   const { initSnake, clearSnake, snakeBodyRef } = snakeManager;
   const { spawnFood, clearFood } = foodManager;
@@ -99,7 +101,7 @@ export function useGameStatus(
                const pointsToAdd = levelRef.current;
                
                // Update level OUTSIDE of setScore to avoid multiple triggers
-               if (willLevelUp) {
+               if (willLevelUp && levelRef.current < maxLevel) {
                  const newLevel = levelRef.current + 1;
                  levelRef.current = newLevel;
                  setLevel(newLevel);

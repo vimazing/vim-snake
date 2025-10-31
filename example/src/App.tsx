@@ -3,7 +3,8 @@ import "@vimazing/vim-snake/game.css";
 import { useKeyBindings } from "./useKeyBindings";
 
 function App() {
-  const { containerRef, gameStatus, scoreManager, keyLog, score, level } = useGame({}, useKeyBindings);
+  const gameManager = useGame({ startingLevel: 10 }, useKeyBindings);
+  const { containerRef, gameStatus, scoreManager, score, level } = gameManager;
 
   const formatTime = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
@@ -15,7 +16,7 @@ function App() {
   return (
     <div className="relative mx-auto my-4 w-fit space-y-4">
       <h1 className="text-2xl font-bold text-center">VIMazing Snake</h1>
-      
+
       <div className="flex gap-4 justify-center text-sm font-mono">
         <div className="px-3 py-1 bg-muted rounded">
           Time: {formatTime(scoreManager.timeValue)}
@@ -37,7 +38,7 @@ function App() {
       </div>
 
       <div ref={containerRef} className="relative" />
-      
+
       <div className="text-center text-sm text-muted-foreground">
         {gameStatus === "waiting" && <p>Press <kbd className="px-2 py-1 bg-muted rounded">space</kbd> to start</p>}
         {gameStatus === "started" && <p>Use <kbd className="px-2 py-1 bg-muted rounded">hjkl</kbd> to change direction • Press <kbd className="px-2 py-1 bg-muted rounded">q</kbd> to quit</p>}

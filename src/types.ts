@@ -34,6 +34,7 @@ export type GameOptions = {
   timeLimit?: number;
   startingLevel?: number;
   foodsPerLevel?: number;
+  maxLevel?: number;
 };
 
 // ============================================================================
