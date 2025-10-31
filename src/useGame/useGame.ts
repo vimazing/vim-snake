@@ -7,24 +7,8 @@ import { useGameStatus } from "../useGameStatus";
 import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
 import { useScore } from "../useScore";
 
-export function useGame(optionsOrCols: GameOptions | number, rows?: number, platformHook?: unknown): GameManager {
-  // Support both old signature (cols, rows) and new signature (options)
-  let cols: number;
-  let startingLevel: number | undefined;
-  let actualPlatformHook = platformHook;
-
-  if (typeof optionsOrCols === 'object') {
-    // New signature: useGame(options, platformHook)
-    const options = optionsOrCols as GameOptions;
-    cols = options.cols;
-    rows = options.rows;
-    startingLevel = options.startingLevel;
-    actualPlatformHook = rows as unknown as typeof platformHook;
-  } else {
-    // Old signature: useGame(cols, rows, platformHook)
-    cols = optionsOrCols;
-    rows = rows || 20;
-  }
+export function useGame(options: GameOptions, platformHook?: unknown): GameManager {
+  const { cols, rows, startingLevel } = options;
 
   const boardManager = useBoard();
   const { containerRef, renderBoard } = boardManager;
@@ -84,8 +68,8 @@ export function useGame(optionsOrCols: GameOptions | number, rows?: number, plat
     togglePause,
   };
 
-  if (typeof actualPlatformHook === "function") {
-    actualPlatformHook(gameManagerResult);
+  if (typeof platformHook === "function") {
+    platformHook(gameManagerResult);
   }
 
   return gameManagerResult;
