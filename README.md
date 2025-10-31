@@ -52,17 +52,17 @@ import { useGame } from "@vimazing/vim-snake";
 import "@vimazing/vim-snake/game.css";
 
 export function SnakeGame() {
-  const { containerRef, gameStatus, startGame } = useGame(30, 20);
-
-  useEffect(() => {
-    startGame();
-  }, [startGame]);
+  const { containerRef, gameStatus, score, level } = useGame();
 
   return (
     <section className="mx-auto w-fit space-y-4">
       <h1 className="text-2xl font-bold">VIMazing Snake</h1>
+      <div className="flex gap-4 justify-center">
+        <div>Score: {score}</div>
+        <div>Level: {level}</div>
+      </div>
       <div ref={containerRef} className="relative" />
-      {gameStatus === "game-won" && <p>🎉 You won!</p>}
+      {gameStatus === "game-over" && <p>Game Over! Press Space to restart</p>}
     </section>
   );
 }
@@ -70,29 +70,74 @@ export function SnakeGame() {
 
 > **Note:** You must manually import the CSS file. The package exports styles but does not auto-import them, giving you control over when and how styles are loaded.
 
-Default controls:
+### Default Controls
 
-| Key                 | Action          |
-| ------------------- | --------------- |
-| `i`                 | Start game      |
-| `h` / `j` / `k` / `l` | Change direction |
-| `q`                 | Quit game       |
-| `Esc`               | Cancel / pause  |
+| Key         | Action              |
+| ----------- | ------------------- |
+| `Space`     | Start / Restart     |
+| `h` / `l`   | Turn left / right   |
+| `j` / `k`   | Turn down / up      |
+| `q`         | Quit game           |
+| `p`         | Pause / unpause     |
+
+### Game Options
+
+Use `GameOptions` to customize the game:
+
+```tsx
+const game = useGame({
+  cols: 40,                    // Board width (default: 30)
+  rows: 25,                    // Board height (default: 20)
+  startingLevel: 5,            // Initial level (default: 1)
+  foodsPerLevel: 5,            // Foods to level up (default: 10)
+  maxLevel: 20,                // Maximum level (default: 25)
+  initialSnakeSize: 5,         // Snake segments at start (default: 3)
+  initialFoodCount: 2,         // Food items at start (default: 1)
+});
+```
+
+All options are optional with sensible defaults. Call `useGame()` with no arguments for default settings.
 
 ---
 
-## Core Hooks
+## API
 
-| Hook | Description |
-| ---- | ----------- |
-| `useGame(cols, rows, platformHook?)` | One-stop hook that wires board rendering, snake state, food spawning, scoring, and keyboard bindings. Returns refs, status helpers, and managers you can compose with your UI. |
-| `useScore()` | Tracks timers, level progression, and final score calculation. |
+### useGame Hook
 
-Each hook is exported individually, so you can cherry-pick only what you need:
+Main hook that orchestrates all game mechanics:
 
 ```ts
-import { useScore } from "@vimazing/vim-snake/useScore";
+const gameManager = useGame(options?, platformHook?);
 ```
+
+**Parameters:**
+- `options` (optional): `GameOptions` object for customization
+- `platformHook` (optional): Function to handle platform-specific logic
+
+**Returns:** `GameManager` with:
+- `containerRef` – DOM ref for game board rendering
+- `gameStatus` – Current state ('waiting' | 'started' | 'game-over' | 'game-won')
+- `score` – Current game score
+- `level` – Current level (also equals game speed in FPS)
+- `scoreManager` – Tracks time, keystrokes, and final score
+- `cursor` – Snake manager with movement and state
+- `keyLog` – Array of all key presses during game
+- Control methods: `startGame()`, `quitGame()`, `togglePause()`, etc.
+
+### gameInfo Export
+
+Get complete game documentation for platforms:
+
+```ts
+import { gameInfo } from "@vimazing/vim-snake";
+
+console.log(gameInfo.name);           // "VIMazing Snake"
+console.log(gameInfo.controls);       // Control mappings
+console.log(gameInfo.scoring);        // Scoring rules
+console.log(gameInfo.configuration);  // All GameOptions
+```
+
+Perfect for building help screens, settings, and platform integrations.
 
 ---
 
