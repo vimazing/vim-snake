@@ -32,6 +32,7 @@ export type GameOptions = {
   cols: number;
   rows: number;
   timeLimit?: number;
+  startingLevel?: number;
 };
 
 // ============================================================================

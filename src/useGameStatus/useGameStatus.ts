@@ -4,28 +4,32 @@ import type { UseBoardType } from "../useBoard";
 import type { UseCursorType } from "../useCursor";
 import type { UseFoodType } from "../useGame/useFood";
 
-const INITIAL_FPS = 3;
 const FOODS_PER_LEVEL = 2;
+
+export type UseGameStatusParams = {
+  startingLevel?: number;
+};
 
 export function useGameStatus(
   boardManager: UseBoardType,
   snakeManager: UseCursorType,
-  foodManager: UseFoodType
+  foodManager: UseFoodType,
+  params?: UseGameStatusParams
 ) {
+  const startingLevel = params?.startingLevel ?? 1;
   const { containerRef } = boardManager;
   const { initSnake, clearSnake, snakeBodyRef } = snakeManager;
   const { spawnFood, clearFood } = foodManager;
   const [gameStatus, setGameStatus] = useState<GameStatus>("waiting");
   const [score, setScore] = useState(0);
-  const [level, setLevel] = useState(1);
+  const [level, setLevel] = useState(startingLevel);
   const [paused, setPaused] = useState(false);
-  const levelRef = useRef(1);
+  const levelRef = useRef(startingLevel);
   const foodsEatenRef = useRef(0);
   const gameLoopRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
   const snakeManagerRef = useRef(snakeManager);
   const foodManagerRef = useRef(foodManager);
-  const currentFpsRef = useRef(INITIAL_FPS);
 
   snakeManagerRef.current = snakeManager;
   foodManagerRef.current = foodManager;
@@ -34,10 +38,9 @@ export function useGameStatus(
     initSnake();
     spawnFood(snakeBodyRef.current, 3);
     setScore(0);
-    setLevel(1);
-    levelRef.current = 1;
+    setLevel(startingLevel);
+    levelRef.current = startingLevel;
     foodsEatenRef.current = 0;
-    currentFpsRef.current = INITIAL_FPS;
     setGameStatus("started");
   };
 
@@ -61,67 +64,66 @@ export function useGameStatus(
       let shouldGrow = false;
       lastUpdateRef.current = performance.now();
 
-      const gameLoop = (timestamp: number) => {
-        const msPerFrame = 1000 / currentFpsRef.current;
-        const elapsed = timestamp - lastUpdateRef.current;
+       const gameLoop = (timestamp: number) => {
+         const msPerFrame = 1000 / levelRef.current;
+         const elapsed = timestamp - lastUpdateRef.current;
 
-        if (elapsed >= msPerFrame) {
-          // Apply any buffered direction input BEFORE moving
-          snakeManagerRef.current.applyBufferedDirection();
+         if (elapsed >= msPerFrame) {
+           // Apply any buffered direction input BEFORE moving
+           snakeManagerRef.current.applyBufferedDirection();
 
-          const result = snakeManagerRef.current.moveSnake(shouldGrow);
+           const result = snakeManagerRef.current.moveSnake(shouldGrow);
 
-          shouldGrow = false;
+           shouldGrow = false;
 
-          if (result === "wall-collision" || result === "self-collision") {
-            const container = containerRef.current;
-            container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el: Element) => {
-              (el as HTMLElement).classList.add("collision");
-            });
-            setGameStatus("game-over");
-            return;
-          }
-
-           const head = snakeManagerRef.current.snakeBodyRef.current[0];
-           if (head && foodManagerRef.current.checkFoodCollision(head)) {
-             foodManagerRef.current.removeFood(head);
-             shouldGrow = true;
-
-             // Check BEFORE incrementing if we're about to level up
-             const willLevelUp = (foodsEatenRef.current + 1) >= FOODS_PER_LEVEL;
-
-              foodsEatenRef.current += 1;
-
-              // Save the current level BEFORE any changes
-              const pointsToAdd = levelRef.current;
-              
-              // Update level OUTSIDE of setScore to avoid multiple triggers
-              if (willLevelUp) {
-                const newLevel = levelRef.current + 1;
-                levelRef.current = newLevel;
-                setLevel(newLevel);
-                currentFpsRef.current = INITIAL_FPS + (newLevel - 1);
-                foodsEatenRef.current = 0;
-              }
-
-              setScore((prev) => {
-                // Add points at CURRENT level
-                let newScore = prev + pointsToAdd;
-
-               foodManagerRef.current.spawnFood(
-                 snakeManagerRef.current.snakeBodyRef.current,
-                 1
-               );
-               return newScore;
+           if (result === "wall-collision" || result === "self-collision") {
+             const container = containerRef.current;
+             container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el: Element) => {
+               (el as HTMLElement).classList.add("collision");
              });
+             setGameStatus("game-over");
+             return;
+           }
 
-          }
+            const head = snakeManagerRef.current.snakeBodyRef.current[0];
+            if (head && foodManagerRef.current.checkFoodCollision(head)) {
+              foodManagerRef.current.removeFood(head);
+              shouldGrow = true;
 
-          lastUpdateRef.current = timestamp;
-        }
+              // Check BEFORE incrementing if we're about to level up
+              const willLevelUp = (foodsEatenRef.current + 1) >= FOODS_PER_LEVEL;
 
-        gameLoopRef.current = requestAnimationFrame(gameLoop);
-      };
+               foodsEatenRef.current += 1;
+
+               // Save the current level BEFORE any changes
+               const pointsToAdd = levelRef.current;
+               
+               // Update level OUTSIDE of setScore to avoid multiple triggers
+               if (willLevelUp) {
+                 const newLevel = levelRef.current + 1;
+                 levelRef.current = newLevel;
+                 setLevel(newLevel);
+                 foodsEatenRef.current = 0;
+               }
+
+               setScore((prev) => {
+                 // Add points at CURRENT level
+                 let newScore = prev + pointsToAdd;
+
+                foodManagerRef.current.spawnFood(
+                  snakeManagerRef.current.snakeBodyRef.current,
+                  1
+                );
+                return newScore;
+              });
+
+           }
+
+           lastUpdateRef.current = timestamp;
+         }
+
+         gameLoopRef.current = requestAnimationFrame(gameLoop);
+       };
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
 

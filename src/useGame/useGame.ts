@@ -10,6 +10,7 @@ import { useScore } from "../useScore";
 export function useGame(optionsOrCols: GameOptions | number, rows?: number, platformHook?: unknown): GameManager {
   // Support both old signature (cols, rows) and new signature (options)
   let cols: number;
+  let startingLevel: number | undefined;
   let actualPlatformHook = platformHook;
 
   if (typeof optionsOrCols === 'object') {
@@ -17,6 +18,7 @@ export function useGame(optionsOrCols: GameOptions | number, rows?: number, plat
     const options = optionsOrCols as GameOptions;
     cols = options.cols;
     rows = options.rows;
+    startingLevel = options.startingLevel;
     actualPlatformHook = rows as unknown as typeof platformHook;
   } else {
     // Old signature: useGame(cols, rows, platformHook)
@@ -32,7 +34,7 @@ export function useGame(optionsOrCols: GameOptions | number, rows?: number, plat
 
   const foodManager = useFood(cols, rows, boardManager);
 
-  const gameManager = useGameStatus(boardManager, snakeManager, foodManager);
+  const gameManager = useGameStatus(boardManager, snakeManager, foodManager, { startingLevel });
   const { gameStatus, setGameStatus, startGame, quitGame, togglePause, score, level } = gameManager;
 
   useEffect(() => {
