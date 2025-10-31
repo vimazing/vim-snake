@@ -1,6 +1,6 @@
 {
   "name": "@vimazing/vim-snake",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Classic Snake reimagined with Vim controls — a lightweight, typed React hook library for building snake games with hjkl navigation.",
   "author": "André Padez <andre.padez@gmail.com>",
   "keywords": [
