@@ -4,4 +4,5 @@ export * from './useGameStatus';
 export * from './useBoard';
 export * from './useScore';
 export * from './types';
+export * from './gameInfo';
 
