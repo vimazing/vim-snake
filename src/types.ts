@@ -35,6 +35,8 @@ export type GameOptions = {
   startingLevel?: number;
   foodsPerLevel?: number;
   maxLevel?: number;
+  initialSnakeSize?: number;
+  initialFoodCount?: number;
 };
 
 // ============================================================================

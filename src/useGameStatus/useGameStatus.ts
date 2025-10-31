@@ -8,6 +8,7 @@ export type UseGameStatusParams = {
   startingLevel?: number;
   foodsPerLevel?: number;
   maxLevel?: number;
+  initialFoodCount?: number;
 };
 
 export function useGameStatus(
@@ -19,6 +20,7 @@ export function useGameStatus(
   const startingLevel = params?.startingLevel ?? 1;
   const foodsPerLevel = params?.foodsPerLevel ?? 10;
   const maxLevel = params?.maxLevel ?? 25;
+  const initialFoodCount = params?.initialFoodCount ?? 1;
   const { containerRef } = boardManager;
   const { initSnake, clearSnake, snakeBodyRef } = snakeManager;
   const { spawnFood, clearFood } = foodManager;
@@ -38,7 +40,7 @@ export function useGameStatus(
 
   const startGame = () => {
     initSnake();
-    spawnFood(snakeBodyRef.current, 3);
+    spawnFood(snakeBodyRef.current, initialFoodCount);
     setScore(0);
     setLevel(startingLevel);
     levelRef.current = startingLevel;

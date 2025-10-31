@@ -2,11 +2,17 @@ import { useRef, useState } from "react";
 import type { Direction, SnakeBody, Position } from "../types";
 import type { UseBoardType } from "../useBoard";
 
+export type UseCursorParams = {
+  initialSnakeSize?: number;
+};
+
 export function useCursor(
   cols: number,
   rows: number,
-  boardManager: UseBoardType
+  boardManager: UseBoardType,
+  params?: UseCursorParams
 ) {
+  const initialSnakeSize = params?.initialSnakeSize ?? 3;
   const { containerRef } = boardManager;
   const [snakeBody, setSnakeBody] = useState<SnakeBody>([]);
   const snakeBodyRef = useRef<SnakeBody>([]);
@@ -19,11 +25,10 @@ export function useCursor(
      const centerR = Math.floor(rows / 2);
      const centerC = Math.floor(cols / 2);
      
-      const initialBody: SnakeBody = [
-        { r: centerR, c: centerC },
-        { r: centerR + 1, c: centerC },
-        { r: centerR + 2, c: centerC },
-      ];
+      const initialBody: SnakeBody = [];
+      for (let i = 0; i < initialSnakeSize; i++) {
+        initialBody.push({ r: centerR + i, c: centerC });
+      }
     
     setSnakeBody(initialBody);
     snakeBodyRef.current = initialBody;
