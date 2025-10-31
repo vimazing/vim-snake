@@ -29,8 +29,8 @@ export type SnakeBody = Position[];
 export type KeyLogEntry = { key: string; timestamp: number };
 
 export type GameOptions = {
-  cols: number;
-  rows: number;
+  cols?: number;
+  rows?: number;
   timeLimit?: number;
   startingLevel?: number;
 };

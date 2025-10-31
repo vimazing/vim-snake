@@ -7,8 +7,8 @@ import { useGameStatus } from "../useGameStatus";
 import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
 import { useScore } from "../useScore";
 
-export function useGame(options: GameOptions, platformHook?: unknown): GameManager {
-  const { cols, rows, startingLevel } = options;
+export function useGame(options?: GameOptions, platformHook?: unknown): GameManager {
+  const { cols = 30, rows = 20, startingLevel } = options ?? {};
 
   const boardManager = useBoard();
   const { containerRef, renderBoard } = boardManager;
