@@ -8,7 +8,7 @@ import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
 import { useScore } from "../useScore";
 
 export function useGame(options?: GameOptions, platformHook?: unknown): GameManager {
-  const { cols = 30, rows = 20, startingLevel } = options ?? {};
+  const { cols = 30, rows = 20, startingLevel, foodsPerLevel } = options ?? {};
 
   const boardManager = useBoard();
   const { containerRef, renderBoard } = boardManager;
@@ -18,7 +18,7 @@ export function useGame(options?: GameOptions, platformHook?: unknown): GameMana
 
   const foodManager = useFood(cols, rows, boardManager);
 
-  const gameManager = useGameStatus(boardManager, snakeManager, foodManager, { startingLevel });
+  const gameManager = useGameStatus(boardManager, snakeManager, foodManager, { startingLevel, foodsPerLevel });
   const { gameStatus, setGameStatus, startGame, quitGame, togglePause, score, level } = gameManager;
 
   useEffect(() => {

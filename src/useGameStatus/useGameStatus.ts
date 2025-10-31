@@ -4,10 +4,9 @@ import type { UseBoardType } from "../useBoard";
 import type { UseCursorType } from "../useCursor";
 import type { UseFoodType } from "../useGame/useFood";
 
-const FOODS_PER_LEVEL = 2;
-
 export type UseGameStatusParams = {
   startingLevel?: number;
+  foodsPerLevel?: number;
 };
 
 export function useGameStatus(
@@ -17,6 +16,7 @@ export function useGameStatus(
   params?: UseGameStatusParams
 ) {
   const startingLevel = params?.startingLevel ?? 1;
+  const foodsPerLevel = params?.foodsPerLevel ?? 10;
   const { containerRef } = boardManager;
   const { initSnake, clearSnake, snakeBodyRef } = snakeManager;
   const { spawnFood, clearFood } = foodManager;
@@ -91,7 +91,7 @@ export function useGameStatus(
               shouldGrow = true;
 
               // Check BEFORE incrementing if we're about to level up
-              const willLevelUp = (foodsEatenRef.current + 1) >= FOODS_PER_LEVEL;
+              const willLevelUp = (foodsEatenRef.current + 1) >= foodsPerLevel;
 
                foodsEatenRef.current += 1;
 
