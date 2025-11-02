@@ -1,4 +1,7 @@
+import { version } from '../package.json';
+
 export const gameInfo = {
+  version,
   name: 'VIMazing Snake',
   description: 'Classic snake game with VIM-style hjkl controls',
 
