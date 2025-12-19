@@ -8,18 +8,15 @@ export type UseScoreParams = {
   currentScore: number;
 };
 
-export function useScore({ gameStatus, keyLog, currentScore }: UseScoreParams) {
+export function useScore({ gameStatus, keyLog }: UseScoreParams) {
   const timer = useTimer();
   const { timeValue, startTimer, stopTimer, resetTimer } = timer;
 
   useScoreTime({ gameStatus, timer });
 
-  const finalScore = gameStatus === 'game-over' || gameStatus === 'game-won' ? currentScore : null;
-
   return {
     timeValue,
     totalKeystrokes: keyLog.length,
-    finalScore,
     startTimer,
     stopTimer,
     resetTimer,

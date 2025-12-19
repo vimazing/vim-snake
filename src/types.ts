@@ -90,7 +90,6 @@ export type SnakeCursorManager = CursorManager & {
 export type ScoreManager = {
   timeValue: number;
   totalKeystrokes: number;
-  finalScore: number | null;
   startTimer: () => void;
   stopTimer: () => void;
   resetTimer: () => void;
