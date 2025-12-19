@@ -1,20 +1,18 @@
 import { useState, useRef } from "react";
 import type { Position, SnakeBody } from "../types";
-import type { UseBoardType } from "../useBoard";
 
-export function useFood(
-  cols: number,
-  rows: number,
-  boardManager: UseBoardType
-) {
-  const { containerRef } = boardManager;
+export function useFood(cols: number, rows: number) {
   const [foodPositions, setFoodPositions] = useState<Position[]>([]);
   const foodPositionsRef = useRef<Position[]>([]);
 
-  const spawnFood = (snakeBody: SnakeBody, count: number = 1) => {
+  function spawnFood(snakeBody: SnakeBody, count: number = 1) {
     const occupiedPositions = new Set(
       snakeBody.map((seg) => `${seg.r},${seg.c}`)
     );
+
+    foodPositionsRef.current.forEach((f) => {
+      occupiedPositions.add(`${f.r},${f.c}`);
+    });
 
     const availablePositions: Position[] = [];
     for (let r = 0; r < rows; r++) {
@@ -26,7 +24,7 @@ export function useFood(
       }
     }
 
-    const newFood: Position[] = [];
+    const newFood: Position[] = [...foodPositionsRef.current];
     for (let i = 0; i < count && availablePositions.length > 0; i++) {
       const randomIndex = Math.floor(Math.random() * availablePositions.length);
       const food = availablePositions.splice(randomIndex, 1)[0];
@@ -35,52 +33,25 @@ export function useFood(
 
     setFoodPositions(newFood);
     foodPositionsRef.current = newFood;
-    renderFood(newFood);
-  };
+  }
 
-   const clearFood = () => {
-     setFoodPositions([]);
-     foodPositionsRef.current = [];
-     const container = containerRef.current;
-     container?.querySelectorAll(".food").forEach((el: Element) => {
-       (el as HTMLElement).classList.remove("food");
-     });
-   };
+  function clearFood() {
+    setFoodPositions([]);
+    foodPositionsRef.current = [];
+  }
 
-   const renderFood = (positions: Position[]) => {
-     const container = containerRef.current;
-     if (!container) return;
-
-     container.querySelectorAll(".food").forEach((el: Element) => {
-       (el as HTMLElement).classList.remove("food");
-     });
-
-    positions.forEach((pos) => {
-      const cell = container.querySelector(
-        `.snake-cell[data-r="${pos.r}"][data-c="${pos.c}"]`
-      );
-      if (cell) {
-        cell.classList.add("food");
-      }
-    });
-  };
-
-  const checkFoodCollision = (headPos: Position): boolean => {
+  function checkFoodCollision(headPos: Position): boolean {
     const food = foodPositionsRef.current;
-    const collision = food.some(
-      (f) => f.r === headPos.r && f.c === headPos.c
-    );
-    return collision;
-  };
+    return food.some((f) => f.r === headPos.r && f.c === headPos.c);
+  }
 
-  const removeFood = (pos: Position) => {
+  function removeFood(pos: Position) {
     const newFood = foodPositionsRef.current.filter(
       (f) => !(f.r === pos.r && f.c === pos.c)
     );
     setFoodPositions(newFood);
     foodPositionsRef.current = newFood;
-    renderFood(newFood);
-  };
+  }
 
   return {
     foodPositions,
@@ -89,7 +60,6 @@ export function useFood(
     clearFood,
     checkFoodCollision,
     removeFood,
-    renderFood,
   };
 }
 

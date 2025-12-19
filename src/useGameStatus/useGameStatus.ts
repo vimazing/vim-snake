@@ -21,127 +21,134 @@ export function useGameStatus(
   const foodsPerLevel = params?.foodsPerLevel ?? 10;
   const maxLevel = params?.maxLevel ?? 25;
   const initialFoodCount = params?.initialFoodCount ?? 1;
-  const { containerRef } = boardManager;
+
+  const { renderFrame, spawnFoodParticles } = boardManager;
   const { initSnake, clearSnake, snakeBodyRef } = snakeManager;
   const { spawnFood, clearFood } = foodManager;
+
   const [gameStatus, setGameStatus] = useState<GameStatus>("waiting");
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(startingLevel);
   const [paused, setPaused] = useState(false);
+
   const levelRef = useRef(startingLevel);
   const foodsEatenRef = useRef(0);
   const gameLoopRef = useRef<number | null>(null);
-  const lastUpdateRef = useRef<number>(0);
+  const lastGameTickRef = useRef<number>(0);
+  const shouldGrowRef = useRef(false);
+  const gameOverRef = useRef(false);
+
   const snakeManagerRef = useRef(snakeManager);
   const foodManagerRef = useRef(foodManager);
+  const pausedRef = useRef(false);
 
   snakeManagerRef.current = snakeManager;
   foodManagerRef.current = foodManager;
 
-  const startGame = () => {
+  function startGame() {
     initSnake();
     spawnFood(snakeBodyRef.current, initialFoodCount);
     setScore(0);
     setLevel(startingLevel);
     levelRef.current = startingLevel;
     foodsEatenRef.current = 0;
+    shouldGrowRef.current = false;
+    gameOverRef.current = false;
     setGameStatus("started");
-  };
+  }
 
-  const stopGame = () => {
+  function stopGame() {
     if (gameLoopRef.current) {
       cancelAnimationFrame(gameLoopRef.current);
       gameLoopRef.current = null;
     }
     clearSnake();
     clearFood();
+    gameOverRef.current = false;
     setGameStatus("waiting");
-     const container = containerRef.current;
-     container?.querySelectorAll(".snake-head, .snake-body, .snake-tail, .collision").forEach((el: Element) => {
-       (el as HTMLElement).classList.remove("snake-head", "snake-body", "snake-tail", "collision");
-     });
-  };
+  }
+
+  function togglePause() {
+    setPaused((curr) => {
+      pausedRef.current = !curr;
+      return !curr;
+    });
+  }
 
   useEffect(() => {
-    if (gameStatus === "started") {
-      if (paused) return;
-      let shouldGrow = false;
-      lastUpdateRef.current = performance.now();
+    if (gameStatus !== "started") return;
 
-       const gameLoop = (timestamp: number) => {
-         const msPerFrame = 1000 / levelRef.current;
-         const elapsed = timestamp - lastUpdateRef.current;
+    lastGameTickRef.current = performance.now();
 
-         if (elapsed >= msPerFrame) {
-           // Apply any buffered direction input BEFORE moving
-           snakeManagerRef.current.applyBufferedDirection();
+    function gameLoop(timestamp: number) {
+      const msPerTick = 1000 / levelRef.current;
+      const elapsed = timestamp - lastGameTickRef.current;
 
-           const result = snakeManagerRef.current.moveSnake(shouldGrow);
+      if (!pausedRef.current && !gameOverRef.current) {
+        if (elapsed >= msPerTick) {
+          snakeManagerRef.current.applyBufferedDirection();
 
-           shouldGrow = false;
+          const result = snakeManagerRef.current.moveSnake(shouldGrowRef.current);
+          shouldGrowRef.current = false;
 
-           if (result === "wall-collision" || result === "self-collision") {
-             const container = containerRef.current;
-             container?.querySelectorAll(".snake-head, .snake-body, .snake-tail").forEach((el: Element) => {
-               (el as HTMLElement).classList.add("collision");
-             });
-             setGameStatus("game-over");
-             return;
-           }
-
+          if (result === "wall-collision" || result === "self-collision") {
+            gameOverRef.current = true;
+            setGameStatus("game-over");
+          } else {
             const head = snakeManagerRef.current.snakeBodyRef.current[0];
             if (head && foodManagerRef.current.checkFoodCollision(head)) {
+              spawnFoodParticles(head);
               foodManagerRef.current.removeFood(head);
-              shouldGrow = true;
+              shouldGrowRef.current = true;
 
-              // Check BEFORE incrementing if we're about to level up
-              const willLevelUp = (foodsEatenRef.current + 1) >= foodsPerLevel;
+              const willLevelUp = foodsEatenRef.current + 1 >= foodsPerLevel;
+              foodsEatenRef.current += 1;
 
-               foodsEatenRef.current += 1;
+              const pointsToAdd = levelRef.current;
 
-               // Save the current level BEFORE any changes
-               const pointsToAdd = levelRef.current;
-               
-               // Update level OUTSIDE of setScore to avoid multiple triggers
-               if (willLevelUp && levelRef.current < maxLevel) {
-                 const newLevel = levelRef.current + 1;
-                 levelRef.current = newLevel;
-                 setLevel(newLevel);
-                 foodsEatenRef.current = 0;
-               }
+              if (willLevelUp && levelRef.current < maxLevel) {
+                const newLevel = levelRef.current + 1;
+                levelRef.current = newLevel;
+                setLevel(newLevel);
+                foodsEatenRef.current = 0;
+              }
 
-               setScore((prev) => {
-                 // Add points at CURRENT level
-                 let newScore = prev + pointsToAdd;
+              setScore((prev) => prev + pointsToAdd);
 
-                foodManagerRef.current.spawnFood(
-                  snakeManagerRef.current.snakeBodyRef.current,
-                  1
-                );
-                return newScore;
-              });
+              foodManagerRef.current.spawnFood(
+                snakeManagerRef.current.snakeBodyRef.current,
+                1
+              );
+            }
+          }
 
-           }
+          lastGameTickRef.current = timestamp;
+        }
+      }
 
-           lastUpdateRef.current = timestamp;
-         }
-
-         gameLoopRef.current = requestAnimationFrame(gameLoop);
-       };
+      renderFrame({
+        snakeBody: snakeManagerRef.current.snakeBodyRef.current,
+        direction: snakeManagerRef.current.directionRef.current,
+        foodPositions: foodManagerRef.current.foodPositionsRef.current,
+        gameOver: gameOverRef.current,
+        paused: pausedRef.current,
+      });
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
-
-      return () => {
-        if (gameLoopRef.current) {
-          cancelAnimationFrame(gameLoopRef.current);
-          gameLoopRef.current = null;
-        }
-      };
     }
-  }, [gameStatus, paused]);
+
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
+
+    return () => {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
+    };
+  }, [gameStatus]);
 
   useEffect(() => {
-    if (gameStatus === "game-over") {
+    if (gameStatus === "game-over" || gameStatus === "waiting") {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
         gameLoopRef.current = null;
@@ -156,7 +163,7 @@ export function useGameStatus(
     stopGame,
     quitGame: stopGame,
     paused,
-    togglePause: () => setPaused(curr => !curr),
+    togglePause,
     score,
     level,
   };

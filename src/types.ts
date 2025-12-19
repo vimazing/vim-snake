@@ -37,6 +37,7 @@ export type GameOptions = {
   maxLevel?: number;
   initialSnakeSize?: number;
   initialFoodCount?: number;
+  cellSize?: number;
 };
 
 // ============================================================================
@@ -74,13 +75,12 @@ export type SnakeCursorManager = CursorManager & {
   snakeBody: SnakeBody;
   direction: Direction;
   changeDirection: (dir: Direction) => void;
-  // Snake-specific for internal use
   snakeBodyRef: MutableRefObject<SnakeBody>;
   directionRef: MutableRefObject<Direction>;
   initSnake: () => void;
   clearSnake: () => void;
+  applyBufferedDirection: () => void;
   moveSnake: (grow?: boolean) => 'continue' | 'wall-collision' | 'self-collision';
-  renderSnake: (body: SnakeBody) => void;
 };
 
 // ============================================================================

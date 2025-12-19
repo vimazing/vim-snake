@@ -8,21 +8,43 @@ import { useKeyBindings, type UseKeyBindingsType } from "./useKeyBindings";
 import { useScore } from "../useScore";
 
 export function useGame(options?: GameOptions, platformHook?: unknown): GameManager {
-  const { cols = 30, rows = 20, startingLevel, foodsPerLevel, maxLevel, initialSnakeSize, initialFoodCount } = options ?? {};
+  const {
+    cols = 30,
+    rows = 20,
+    startingLevel,
+    foodsPerLevel,
+    maxLevel,
+    initialSnakeSize,
+    initialFoodCount,
+    cellSize,
+  } = options ?? {};
 
-  const boardManager = useBoard();
-  const { containerRef, renderBoard } = boardManager;
+  const boardManager = useBoard({ cellSize });
+  const { containerRef, renderBoard, renderFrame } = boardManager;
 
-  const snakeManager = useCursor(cols, rows, boardManager, { initialSnakeSize });
-  const { changeDirection } = snakeManager;
+  const snakeManager = useCursor(cols, rows, { initialSnakeSize });
+  const { changeDirection, snakeBodyRef, directionRef } = snakeManager;
 
-  const foodManager = useFood(cols, rows, boardManager);
+  const foodManager = useFood(cols, rows);
 
-  const gameManager = useGameStatus(boardManager, snakeManager, foodManager, { startingLevel, foodsPerLevel, maxLevel, initialFoodCount });
+  const gameManager = useGameStatus(boardManager, snakeManager, foodManager, {
+    startingLevel,
+    foodsPerLevel,
+    maxLevel,
+    initialFoodCount,
+  });
   const { gameStatus, setGameStatus, startGame, quitGame, togglePause, score, level } = gameManager;
 
   useEffect(() => {
     renderBoard(cols, rows);
+
+    renderFrame({
+      snakeBody: snakeBodyRef.current,
+      direction: directionRef.current,
+      foodPositions: foodManager.foodPositionsRef.current,
+      gameOver: false,
+      paused: false,
+    });
   }, [cols, rows]);
 
   const keyBindings: UseKeyBindingsType = useKeyBindings({
@@ -34,37 +56,29 @@ export function useGame(options?: GameOptions, platformHook?: unknown): GameMana
 
   const scoreManager = useScore({ gameStatus, keyLog: keyBindings.keyLog, currentScore: score });
 
-  // Wrap renderBoard to match Unified API signature
-  const renderBoardWrapped = () => {
+  function renderBoardWrapped() {
     renderBoard(cols, rows);
-  };
+  }
 
-  // Build Unified API compliant GameManager
   const gameManagerResult: GameManager = {
-    // Required rendering
     containerRef,
     renderBoard: renderBoardWrapped,
 
-    // Required managers
     cursor: snakeManager,
     scoreManager,
 
-    // Required lifecycle
     gameStatus,
     setGameStatus,
     startGame,
     quitGame,
 
-    // Required state
     level,
     score,
 
-    // Required key tracking
     keyLog: keyBindings.keyLog,
     clearKeyLog: keyBindings.clearLog,
     getKeyLog: keyBindings.getLog,
 
-    // Game-specific additions
     togglePause,
   };
 

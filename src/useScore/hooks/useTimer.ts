@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type UseTimerReturn = {
   timeValue: number;
@@ -8,9 +8,6 @@ export type UseTimerReturn = {
 };
 
 export type UseTimerOptions = {
-  /**
-   * Interval (in ms) between updates. Defaults to 100ms.
-   */
   interval?: number;
 };
 
@@ -22,16 +19,15 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerReturn {
   const offsetRef = useRef(0);
   const startTimeRef = useRef<number | null>(null);
 
-  const update = useCallback(() => {
+  function update() {
     if (startTimeRef.current === null) {
       return;
     }
-
     const now = performance.now();
     setTimeValue(offsetRef.current + (now - startTimeRef.current));
-  }, []);
+  }
 
-  const startTimer = useCallback(() => {
+  function startTimer() {
     if (intervalIdRef.current !== null) {
       return;
     }
@@ -42,9 +38,9 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerReturn {
 
     update();
     intervalIdRef.current = setInterval(update, Math.max(16, interval));
-  }, [interval, update]);
+  }
 
-  const stopTimer = useCallback(() => {
+  function stopTimer() {
     if (intervalIdRef.current !== null) {
       clearInterval(intervalIdRef.current);
       intervalIdRef.current = null;
@@ -55,9 +51,9 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerReturn {
       offsetRef.current += performance.now() - startTimeRef.current;
       startTimeRef.current = null;
     }
-  }, [update]);
+  }
 
-  const resetTimer = useCallback(() => {
+  function resetTimer() {
     if (intervalIdRef.current !== null) {
       clearInterval(intervalIdRef.current);
       intervalIdRef.current = null;
@@ -66,7 +62,7 @@ export function useTimer(options: UseTimerOptions = {}): UseTimerReturn {
     startTimeRef.current = null;
     offsetRef.current = 0;
     setTimeValue(0);
-  }, []);
+  }
 
   useEffect(() => {
     return () => {
